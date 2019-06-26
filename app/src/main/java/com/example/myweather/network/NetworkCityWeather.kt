@@ -1,10 +1,12 @@
 package com.example.myweather.network
 
-data class WeatherCity(
+import com.example.myweather.repository.CityWeather
+
+data class NetworkCityWeather(
     val city: City,
     val cnt: Int,
     val cod: String,
-    val list: List<WeatherDay>,
+    val list: List<DayWeather>,
     val message: Double
 ) {
     data class City(
@@ -21,7 +23,7 @@ data class WeatherCity(
         )
     }
 
-    data class WeatherDay(
+    data class DayWeather(
         val clouds: Int,
         val deg: Int,
         val dt: Double,
@@ -50,6 +52,9 @@ data class WeatherCity(
 
 }
 
+fun NetworkCityWeather.asDomainModel(): CityWeather {
+    return CityWeather(city.name)
+}
 
 
 
