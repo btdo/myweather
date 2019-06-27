@@ -1,10 +1,7 @@
 package com.example.myweather.ui
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.example.myweather.repository.CityWeather
 import com.example.myweather.repository.WeatherRepository
 import kotlinx.coroutines.CoroutineScope
@@ -14,8 +11,6 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 
 class HomeFragmentViewModel(application: Application) : AndroidViewModel(application) {
-
-
     /**
      * Event triggered for network error. This is private to avoid exposing a
      * way to set this value to observers.
@@ -48,8 +43,16 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
     private val _cityWeather = MutableLiveData<CityWeather>()
 
+    val cityName = Transformations.map(cityWeather) {
+        it.name
+    }
+
     val cityWeather: LiveData<CityWeather>
         get() = _cityWeather
+
+    init {
+        getWeatherForCity("Toronto")
+    }
 
     fun getWeatherForCity(city: String) {
         viewModelScope.launch {
@@ -61,6 +64,24 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
                 // Show a Toast error message and hide the progress bar.
                 _eventNetworkError.value = true
             }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
+
+    /**
+     * Factory for constructing DevByteViewModel with parameter
+     */
+    class Factory(val app: Application) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(HomeFragmentViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return HomeFragmentViewModel(app) as T
+            }
+            throw IllegalArgumentException("Unable to construct viewmodel")
         }
     }
 

@@ -13,7 +13,10 @@ class HomeFragment : Fragment() {
 
 
     private val viewModel: HomeFragmentViewModel by lazy {
-        ViewModelProviders.of(this).get(HomeFragmentViewModel::class.java)
+        val activity = requireNotNull(this.activity) {
+            "You can only access the viewModel after onActivityCreated()"
+        }
+        ViewModelProviders.of(this, HomeFragmentViewModel.Factory(activity.application)).get(HomeFragmentViewModel::class.java)
     }
 
     override fun onCreateView(
