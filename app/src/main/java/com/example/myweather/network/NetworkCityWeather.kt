@@ -27,7 +27,7 @@ data class NetworkCityWeather(
         val clouds: Int,
         val deg: Int,
         val dt: Double,
-        val humidity: Int,
+        val humidity: Double,
         val pressure: Double,
         val speed: Double,
         val temp: Temp,

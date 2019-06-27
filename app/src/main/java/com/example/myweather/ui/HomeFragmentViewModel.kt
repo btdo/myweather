@@ -8,21 +8,20 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import java.io.IOException
 
 class HomeFragmentViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Event triggered for network error. This is private to avoid exposing a
      * way to set this value to observers.
      */
-    private var _eventNetworkError = MutableLiveData<Boolean>()
+    private var _showNetworkError = MutableLiveData<Boolean>()
 
     /**
      * Event triggered for network error. Views should use this to get access
      * to the data.
      */
-    val eventNetworkError: LiveData<Boolean>
-        get() = _eventNetworkError
+    val showNetworkError: LiveData<Boolean>
+        get() = _showNetworkError
 
     /**
      * This is the job for all coroutines started by this ViewModel.
@@ -43,7 +42,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
     private val _cityWeather = MutableLiveData<CityWeather>()
 
-    val cityName = Transformations.map(cityWeather) {
+    val cityName: LiveData<String> = Transformations.map(_cityWeather) {
         it.name
     }
 
@@ -57,14 +56,21 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     fun getWeatherForCity(city: String) {
         viewModelScope.launch {
             try {
-                val playlist = repository.getCityWeather(city)
-                _eventNetworkError.value = false
-
-            } catch (networkError: IOException) {
+                val cityWeather = repository.getCityWeather(city)
+                _cityWeather.value = cityWeather
+                _showNetworkError.value = false
+            } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.
-                _eventNetworkError.value = true
+                _showNetworkError.value = true
             }
         }
+    }
+
+    /**
+     * Resets the network error flag.
+     */
+    fun onNetworkErrorShown() {
+        _showNetworkError.value = false
     }
 
     override fun onCleared() {

@@ -7,10 +7,8 @@ import com.example.myweather.network.asDomainModel
 
 class WeatherRepository : WeatherRepositoryInterface {
 
-    override suspend fun getCityWeather(city: String) : LiveData<CityWeather> {
+    override suspend fun getCityWeather(city: String) : CityWeather {
         val cityWeather=  WeatherApi.weatherService.getWeatherForCity(city).await()
-        val obj =  MutableLiveData<CityWeather>()
-        obj.value = cityWeather.asDomainModel()
-        return obj
+        return cityWeather.asDomainModel()
     }
 }

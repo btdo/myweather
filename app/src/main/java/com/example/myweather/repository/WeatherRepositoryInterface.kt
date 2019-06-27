@@ -4,6 +4,6 @@ import androidx.lifecycle.LiveData
 
 interface WeatherRepositoryInterface {
 
-    suspend fun getCityWeather(city: String) : LiveData<CityWeather>
+    suspend fun getCityWeather(city: String) : CityWeather
 
 }
