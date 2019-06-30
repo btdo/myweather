@@ -1,9 +1,9 @@
 package com.example.myweather.repository
 
-import androidx.lifecycle.LiveData
-
 interface WeatherRepositoryInterface {
 
-    suspend fun getCityWeather(city: String) : CityWeather
+    suspend fun getTodayWeather(city: String): DayWeather
+
+    suspend fun getForecastWeather(city: String): List<DayWeather>
 
 }

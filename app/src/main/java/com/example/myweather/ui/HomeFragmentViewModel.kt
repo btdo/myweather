@@ -2,7 +2,7 @@ package com.example.myweather.ui
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.example.myweather.repository.CityWeather
+import com.example.myweather.repository.DayWeather
 import com.example.myweather.repository.WeatherRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,24 +40,53 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
     private val repository = WeatherRepository()
 
-    private val _cityWeather = MutableLiveData<CityWeather>()
+    private val _cityWeather = MutableLiveData<DayWeather>()
+    private val _forecastWeather = MutableLiveData<List<DayWeather>>()
 
     val cityName: LiveData<String> = Transformations.map(_cityWeather) {
-        it.name
+        it.city
     }
 
-    val cityWeather: LiveData<CityWeather>
-        get() = _cityWeather
+    val temperature: LiveData<Double> = Transformations.map(_cityWeather) {
+        it.temp
+    }
+
+    val forecast: LiveData<List<DayWeather>>
+        get() {
+            return _forecastWeather
+        }
+
+    private val _isMetric = MutableLiveData<Boolean>()
+
+    val isMetric: LiveData<Boolean>
+        get() {
+            return _isMetric
+        }
 
     init {
-        getWeatherForCity("Toronto")
+        getTodayWeather("Toronto")
+        getForecastWeather("Toronto")
+        _isMetric.value = true
     }
 
-    fun getWeatherForCity(city: String) {
+    private fun getTodayWeather(city: String) {
         viewModelScope.launch {
             try {
-                val cityWeather = repository.getCityWeather(city)
+                val cityWeather = repository.getTodayWeather(city)
                 _cityWeather.value = cityWeather
+                _showNetworkError.value = false
+            } catch (e: Exception) {
+                // Show a Toast error message and hide the progress bar.
+                _showNetworkError.value = true
+            }
+        }
+    }
+
+    private fun getForecastWeather(city: String) {
+        viewModelScope.launch {
+            try {
+                val forecastWeather = repository.getForecastWeather(city)
+                _forecastWeather.value = forecastWeather
                 _showNetworkError.value = false
             } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.
@@ -81,7 +110,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     /**
      * Factory for constructing DevByteViewModel with parameter
      */
-    class Factory(val app: Application) : ViewModelProvider.Factory {
+    class Factory(private val app: Application) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(HomeFragmentViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
