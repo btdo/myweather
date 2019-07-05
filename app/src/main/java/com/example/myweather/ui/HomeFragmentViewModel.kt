@@ -51,7 +51,11 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         it.temp
     }
 
-    val forecast: LiveData<List<DayWeather>>
+    val weatherId: LiveData<Int> = Transformations.map(_cityWeather) {
+        it.weatherId
+    }
+
+    val forecastDays: LiveData<List<DayWeather>>
         get() {
             return _forecastWeather
         }

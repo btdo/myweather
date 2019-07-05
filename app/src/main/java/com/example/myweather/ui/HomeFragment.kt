@@ -5,16 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.example.myweather.R
 import com.example.myweather.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
-
-
     private val viewModel: HomeFragmentViewModel by lazy {
         val activity = requireNotNull(this.activity) {
             "You can only access the viewModel after onActivityCreated()"
@@ -26,13 +22,16 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val binding: FragmentHomeBinding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_home,
-            container,
-            false)
+        val binding = FragmentHomeBinding.inflate(inflater)
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
+        val adapter = ForecastAdapter(context!!, viewModel.isMetric.value ?: true)
+        binding.forecast.adapter = adapter
+
+
+        viewModel.isMetric.observe(this, Observer { isMetric ->
+            adapter.mIsMetric = isMetric ?: true
+        })
 
         viewModel.showNetworkError.observe(this, Observer {showNetworkError ->
             if (showNetworkError){

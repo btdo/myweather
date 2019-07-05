@@ -8,4 +8,51 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="robotoRegularText">
+        <item name="android:typeface">normal</item>
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="robotoLightText">
+        <item name="android:typeface">normal</item>
+        <item name="fontFamily">sans-serif-light</item>
+    </style>
+
+    <style name="robotoCondensedText">
+        <item name="android:typeface">normal</item>
+        <item name="fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <style name="robotoThinText">
+        <item name="android:typeface">normal</item>
+        <item name="fontFamily">sans-serif-thin</item>
+    </style>
+
+    <style name="robotoMediumText">
+        <item name="android:typeface">normal</item>
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="pageTitle" parent="robotoMediumText">
+        <item name="android:textSize">@dimen/textsize_large</item>
+        <item name="android:textColor">@color/mine_shaft</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="pageSubTitle" parent="robotoMediumText">
+        <item name="android:textSize">@dimen/textsize_medium</item>
+        <item name="android:textColor">@color/mine_shaft</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="forecastDescription" parent="robotoLightText">
+        <item name="android:textSize">@dimen/textsize_small</item>
+        <item name="android:textColor">@color/mine_shaft</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+
 </resources>

@@ -1,5 +1,5 @@
 <resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
-    <string name="app_name">MyWeather</string>
+    <string name="app_name">Weston, Wiley, Madeleine Weather</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -195,6 +195,7 @@
       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="a11y_forecast">Forecast: <xliff:g id="condition">%1$s</xliff:g></string>
     <string name="a11y_forecast_icon">Forecast icon: <xliff:g id="condition">%1$s</xliff:g></string>
+    <string name="a11y_temp">Temperature: <xliff:g id="high">%1$s</xliff:g></string>
     <string name="a11y_high_temp">High: <xliff:g id="high">%1$s</xliff:g></string>
     <string name="a11y_low_temp">Low: <xliff:g id="low">%1$s</xliff:g></string>
     <string name="a11y_humidity">Humidity: <xliff:g id="humidity">%1$s</xliff:g></string>

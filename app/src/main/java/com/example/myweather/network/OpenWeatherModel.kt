@@ -9,7 +9,7 @@ data class TodayOpenWeather(
     val clouds: Clouds,
     val cod: Int,
     val coord: Coord,
-    val dt: Int,
+    val dt: Long,
     val id: Int,
     val main: Main,
     val name: String,
@@ -29,6 +29,7 @@ fun TodayOpenWeather.asDomainModel(): DayWeather {
         main.humidity,
         main.pressure,
         wind.speed,
+        wind.deg,
         main.temp
     )
 }
@@ -42,7 +43,7 @@ data class ForecastOpenWeather(
 ) {
     data class Day(
         val clouds: Clouds,
-        val dt: Int,
+        val dt: Long,
         val dt_txt: String,
         val main: Main,
         val rain: Rain?,
@@ -61,8 +62,8 @@ data class ForecastOpenWeather(
 }
 
 data class Wind(
-    val deg: Double,
-    val speed: Double
+    val deg: Float,
+    val speed: Float
 )
 
 data class Weather(
@@ -125,6 +126,7 @@ fun ForecastOpenWeather.asDomainModel(): List<DayWeather> {
                 forecastDay.main.humidity,
                 forecastDay.main.pressure,
                 forecastDay.wind.speed,
+                forecastDay.wind.deg,
                 forecastDay.main.temp
             )
         )
