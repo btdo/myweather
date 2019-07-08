@@ -14,14 +14,21 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
      * Event triggered for network error. This is private to avoid exposing a
      * way to set this value to observers.
      */
-    private var _showNetworkError = MutableLiveData<Boolean>()
+    private var _showError = MutableLiveData<Boolean>()
 
     /**
      * Event triggered for network error. Views should use this to get access
      * to the data.
      */
-    val showNetworkError: LiveData<Boolean>
-        get() = _showNetworkError
+    val showError: LiveData<Boolean>
+        get() = _showError
+
+    private val _viewSelectedDay = MutableLiveData<DayWeather>()
+
+    val viewSelectedDay: LiveData<DayWeather>
+        get() = _viewSelectedDay
+
+
 
     /**
      * This is the job for all coroutines started by this ViewModel.
@@ -40,24 +47,24 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
     private val repository = WeatherRepository()
 
-    private val _cityWeather = MutableLiveData<DayWeather>()
-    private val _forecastWeather = MutableLiveData<List<DayWeather>>()
+    private val _todayWeather = MutableLiveData<DayWeather>()
+    private val _forecastDays = MutableLiveData<List<DayWeather>>()
 
-    val cityName: LiveData<String> = Transformations.map(_cityWeather) {
+    val cityName: LiveData<String> = Transformations.map(_todayWeather) {
         it.city
     }
 
-    val temperature: LiveData<Double> = Transformations.map(_cityWeather) {
+    val temperature: LiveData<Double> = Transformations.map(_todayWeather) {
         it.temp
     }
 
-    val weatherId: LiveData<Int> = Transformations.map(_cityWeather) {
+    val weatherId: LiveData<Int> = Transformations.map(_todayWeather) {
         it.weatherId
     }
 
     val forecastDays: LiveData<List<DayWeather>>
         get() {
-            return _forecastWeather
+            return _forecastDays
         }
 
     private val _isMetric = MutableLiveData<Boolean>()
@@ -73,15 +80,23 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         _isMetric.value = true
     }
 
+    fun viewSelectedDay(dayWeather: DayWeather) {
+        _viewSelectedDay.value = dayWeather
+    }
+
+    fun viewSelectedDayComplete() {
+        _viewSelectedDay.value = null
+    }
+
     private fun getTodayWeather(city: String) {
         viewModelScope.launch {
             try {
                 val cityWeather = repository.getTodayWeather(city)
-                _cityWeather.value = cityWeather
-                _showNetworkError.value = false
+                _todayWeather.value = cityWeather
+                _showError.value = false
             } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.
-                _showNetworkError.value = true
+                _showError.value = true
             }
         }
     }
@@ -90,11 +105,11 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             try {
                 val forecastWeather = repository.getForecastWeather(city)
-                _forecastWeather.value = forecastWeather
-                _showNetworkError.value = false
+                _forecastDays.value = forecastWeather
+                _showError.value = false
             } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.
-                _showNetworkError.value = true
+                _showError.value = true
             }
         }
     }
@@ -103,7 +118,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
      * Resets the network error flag.
      */
     fun onNetworkErrorShown() {
-        _showNetworkError.value = false
+        _showError.value = false
     }
 
     override fun onCleared() {

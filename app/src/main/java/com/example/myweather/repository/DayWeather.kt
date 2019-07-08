@@ -1,6 +1,9 @@
 package com.example.myweather.repository
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
+@Parcelize
 data class DayWeather(
     val city: String,
     val date: Long,
@@ -12,4 +15,4 @@ data class DayWeather(
     val windSpeed: Float,
     val degrees: Float,
     val temp: Double
-)
+) : Parcelable

@@ -12,7 +12,7 @@ import com.example.myweather.repository.DayWeather
 import com.example.myweather.utils.SunshineDateUtils
 import com.example.myweather.utils.SunshineWeatherUtils
 
-class ForecastAdapter(private val mContext: Context, var mIsMetric: Boolean) :
+class ForecastAdapter(private val mContext: Context, var mIsMetric: Boolean, var clickListener: ForecastClickListener) :
     ListAdapter<DayWeather, ForecastAdapter.DayForecastViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayForecastViewHolder {
@@ -26,7 +26,7 @@ class ForecastAdapter(private val mContext: Context, var mIsMetric: Boolean) :
 
     companion object DiffCallback : DiffUtil.ItemCallback<DayWeather>() {
         override fun areItemsTheSame(oldItem: DayWeather, newItem: DayWeather): Boolean {
-            return oldItem === newItem
+            return oldItem.date == newItem.date
         }
 
         override fun areContentsTheSame(oldItem: DayWeather, newItem: DayWeather): Boolean {
@@ -39,6 +39,10 @@ class ForecastAdapter(private val mContext: Context, var mIsMetric: Boolean) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(dayForecast: DayWeather) {
+
+            binding.dayForecastItem.setOnClickListener {
+                clickListener.onClick(dayForecast)
+            }
 
             val weatherImageId: Int = SunshineWeatherUtils
                 .getSmallArtResourceIdForWeatherCondition(dayForecast.weatherId)
@@ -71,4 +75,8 @@ class ForecastAdapter(private val mContext: Context, var mIsMetric: Boolean) :
 
         }
     }
+}
+
+class ForecastClickListener(val clickListener: (day: DayWeather) -> Unit) {
+    fun onClick(dayWeather: DayWeather) = clickListener(dayWeather)
 }
