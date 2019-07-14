@@ -30,7 +30,9 @@ fun TodayOpenWeather.asDomainModel(): DayWeather {
         main.pressure,
         wind.speed,
         wind.deg,
-        main.temp
+        main.temp,
+        weather.get(0).main,
+        weather.get(0).description
     )
 }
 
@@ -127,7 +129,9 @@ fun ForecastOpenWeather.asDomainModel(): List<DayWeather> {
                 forecastDay.main.pressure,
                 forecastDay.wind.speed,
                 forecastDay.wind.deg,
-                forecastDay.main.temp
+                forecastDay.main.temp,
+                forecastDay.weather.get(0).main,
+                forecastDay.weather.get(0).description
             )
         )
     }

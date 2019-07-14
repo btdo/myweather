@@ -55,4 +55,19 @@
     </style>
 
 
+    <style name="detailsLabel" parent="robotoLightText">
+        <item name="android:textSize">@dimen/textsize_small</item>
+        <item name="android:textColor">@color/mine_shaft</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="detailsValue" parent="robotoMediumText">
+        <item name="android:textSize">@dimen/textsize_medium</item>
+        <item name="android:textColor">@color/mine_shaft</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+
 </resources>

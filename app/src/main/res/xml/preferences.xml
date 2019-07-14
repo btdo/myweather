@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:key="about"
+        app:title="About">
+
+        <Preference
+            app:summary="Bao Do"
+            app:title="Developer" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="app"
+        app:title="App Preferences">
+
+        <SwitchPreferenceCompat
+            app:key="enable_sync"
+            app:title="Enable daily syncing" />
+
+        <EditTextPreference
+            app:key="@string/pref_location_key"
+            app:title="@string/pref_location_label"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="@string/pref_units_metric"
+            app:entries="@array/pref_units_options"
+            app:entryValues="@array/pref_units_values"
+            app:key="@string/pref_units_key"
+            app:title="@string/pref_units_label"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

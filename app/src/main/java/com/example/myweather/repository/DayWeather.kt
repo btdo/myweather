@@ -14,5 +14,7 @@ data class DayWeather(
     val pressure: Double,
     val windSpeed: Float,
     val degrees: Float,
-    val temp: Double
+    val temp: Double,
+    val mainDescription: String,
+    val description: String
 ) : Parcelable

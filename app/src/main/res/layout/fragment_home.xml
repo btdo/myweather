@@ -3,7 +3,9 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+
     <data>
+
         <variable
             name="viewModel"
             type="com.example.myweather.ui.HomeFragmentViewModel" />
@@ -34,7 +36,7 @@
                 android:id="@+id/city_name"
                 style="@style/pageTitle"
                 android:layout_marginTop="@dimen/margin_xlarge"
-                android:text="@{viewModel.cityName}"
+                android:text="@{viewModel.location}"
                 tools:text="Mountain View" />
 
             <ImageView
@@ -42,6 +44,7 @@
                 android:layout_width="96dp"
                 android:layout_height="96dp"
                 android:layout_gravity="center"
+                android:layout_marginTop="@dimen/margin_xlarge"
                 android:adjustViewBounds="true"
                 app:weatherId="@{viewModel.weatherId}"
                 tools:src="@drawable/art_clouds" />
@@ -53,6 +56,13 @@
                 app:isMetric="@{viewModel.isMetric}"
                 app:temperature="@{viewModel.temperature}"
                 tools:text="18" />
+
+            <TextView
+                android:id="@+id/description"
+                style="@style/pageSubTitle"
+                android:layout_marginTop="@dimen/margin_xlarge"
+                android:text="@{viewModel.description}"
+                tools:text="Cloudy" />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView

@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-class HomeFragmentViewModel(application: Application) : AndroidViewModel(application) {
+class HomeFragmentViewModel(application: Application, initLocation: String) : AndroidViewModel(application) {
     /**
      * Event triggered for network error. This is private to avoid exposing a
      * way to set this value to observers.
@@ -28,6 +28,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     val viewSelectedDay: LiveData<DayWeather>
         get() = _viewSelectedDay
 
+    private val _location = MutableLiveData<String>().apply { this.value = initLocation }
 
 
     /**
@@ -48,10 +49,16 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     private val repository = WeatherRepository()
 
     private val _todayWeather = MutableLiveData<DayWeather>()
+
     private val _forecastDays = MutableLiveData<List<DayWeather>>()
 
-    val cityName: LiveData<String> = Transformations.map(_todayWeather) {
-        it.city
+    val location: LiveData<String>
+        get() {
+            return _location
+        }
+
+    val description: LiveData<String> = Transformations.map(_todayWeather) {
+        it.mainDescription
     }
 
     val temperature: LiveData<Double> = Transformations.map(_todayWeather) {
@@ -67,7 +74,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
             return _forecastDays
         }
 
-    private val _isMetric = MutableLiveData<Boolean>()
+    private val _isMetric = MutableLiveData<Boolean>().apply { this.value = true }
 
     val isMetric: LiveData<Boolean>
         get() {
@@ -75,9 +82,8 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         }
 
     init {
-        getTodayWeather("Toronto")
-        getForecastWeather("Toronto")
-        _isMetric.value = true
+        getTodayWeather(initLocation)
+        getForecastWeather(initLocation)
     }
 
     fun viewSelectedDay(dayWeather: DayWeather) {
@@ -86,6 +92,10 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
     fun viewSelectedDayComplete() {
         _viewSelectedDay.value = null
+    }
+
+    fun onUnitChanged(isMetric: Boolean) {
+        _isMetric.value = isMetric
     }
 
     private fun getTodayWeather(city: String) {
@@ -114,6 +124,12 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    fun onLocationChanged(city: String) {
+        _location.value = city
+        getTodayWeather(city)
+        getForecastWeather(city)
+    }
+
     /**
      * Resets the network error flag.
      */
@@ -129,11 +145,11 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     /**
      * Factory for constructing DevByteViewModel with parameter
      */
-    class Factory(private val app: Application) : ViewModelProvider.Factory {
+    class Factory(private val app: Application, private val city: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(HomeFragmentViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return HomeFragmentViewModel(app) as T
+                return HomeFragmentViewModel(app, city) as T
             }
             throw IllegalArgumentException("Unable to construct viewmodel")
         }

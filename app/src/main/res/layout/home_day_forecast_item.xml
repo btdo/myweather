@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="dayForecast"
+            type="com.example.myweather.repository.DayWeather" />
+
+        <variable
+            name="isMetric"
+            type="Boolean" />
+
+    </data>
 
     <LinearLayout
         android:id="@+id/day_forecast_item"
@@ -12,6 +25,7 @@
 
         <TextView
             android:id="@+id/forecast_date"
+            app:date="@{dayForecast.date}"
             style="@style/forecastDescription"
             tools:text="Monday" />
 
@@ -24,6 +38,7 @@
             android:layout_marginLeft="@dimen/margin_xxlarge"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
+            app:weatherId="@{dayForecast.weatherId}"
             tools:src="@drawable/art_clouds" />
 
         <TextView
@@ -31,6 +46,7 @@
             style="@style/forecastDescription"
             android:layout_marginStart="@dimen/margin_xxlarge"
             android:layout_marginLeft="@dimen/margin_xxlarge"
+            app:weatherId="@{dayForecast.weatherId}"
             tools:text="Cloudy" />
 
         <TextView
@@ -38,6 +54,8 @@
             style="@style/forecastDescription"
             android:layout_marginStart="@dimen/margin_xxlarge"
             android:layout_marginLeft="@dimen/margin_xxlarge"
+            app:isMetric="@{isMetric}"
+            app:temperature="@{dayForecast.temp}"
             tools:text="13" />
 
         <TextView
@@ -45,6 +63,9 @@
             style="@style/forecastDescription"
             android:layout_marginStart="@dimen/margin_xxlarge"
             android:layout_marginLeft="@dimen/margin_xxlarge"
+            app:degrees="@{dayForecast.degrees}"
+            app:isMetric="@{isMetric}"
+            app:windSpeed="@{dayForecast.windSpeed}"
             tools:text="25 km/h" />
 
     </LinearLayout>

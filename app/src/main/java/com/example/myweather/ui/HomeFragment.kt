@@ -1,22 +1,30 @@
 package com.example.myweather.ui
 
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.NavigationUI
+import androidx.preference.PreferenceManager
+import com.example.myweather.R
 import com.example.myweather.databinding.FragmentHomeBinding
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener {
     private val viewModel: HomeFragmentViewModel by lazy {
         val activity = requireNotNull(this.activity) {
             "You can only access the viewModel after onActivityCreated()"
         }
-        ViewModelProviders.of(this, HomeFragmentViewModel.Factory(activity.application))
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+        val location = sharedPreferences.getString(
+            resources.getString(R.string.pref_location_key),
+            resources.getString(R.string.pref_location_default)
+        )
+        ViewModelProviders.of(this, HomeFragmentViewModel.Factory(activity.application, location!!))
             .get(HomeFragmentViewModel::class.java)
     }
 
@@ -52,6 +60,41 @@ class HomeFragment : Fragment() {
             }
         })
 
+        PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+            .registerOnSharedPreferenceChangeListener(this)
+        setHasOptionsMenu(true)
         return binding.root
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, pref: String) {
+        if (pref == resources.getString(R.string.pref_location_key)) {
+            viewModel.onLocationChanged(
+                sharedPreferences.getString(
+                    pref,
+                    resources.getString(R.string.pref_location_default)
+                )!!
+            )
+        } else if (pref == resources.getString(R.string.pref_units_key)) {
+            val isMetric = sharedPreferences.getString(pref, "") == resources.getString(R.string.pref_units_metric)
+            viewModel.onUnitChanged(isMetric)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+            .unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return NavigationUI.onNavDestinationSelected(
+            item,
+            view!!.findNavController()
+        ) || super.onOptionsItemSelected(item)
     }
 }
