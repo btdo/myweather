@@ -1,5 +1,6 @@
 package com.example.myweather.network
 
+import com.example.myweather.BuildConfig
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -15,13 +16,20 @@ private val moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
     .build()
 
-private const val BASE_URL = "https://samples.openweathermap.org/data/2.5/"
+// production api
+//private const val BASE_URL = "https://api.openweathermap.org/data/2.5/"
+//private const val DEFAULT_APPID = "bb3baa6b163be4873d04a8224b53b145"
+
+// development
+private const val BASE_URL = BuildConfig.BASE_URL
+private const val DEFAULT_APPID = BuildConfig.DEFAULT_APPID
+
 /* The DEFAULT_UNITS we want our API to return */
 private const val DEFAULT_UNITS = "metric"
+private const val IMPERIAL_UNITS = "imperial"
 /* The number of days we want our API to return */
-private const val DEFAULT_NUMDAYS = 14
+private const val DEFAULT_NUMDAYS = 5
 private const val DEFAULT_FORMAT = "json"
-private const val DEFAULT_APPID = "b6907d289e10d714a6e88b30761fae22"
 /* The query parameter allows us to provide a location string to the API */
 private const val QUERY_PARAM = "q"
 private const val FORMAT_PARAM = "mode"
@@ -51,26 +59,46 @@ fun setupRetrofit(): Retrofit {
 
 interface WeatherApiService {
     @GET("weather")
-    fun getTodayWeather(
+    fun getCurrentWeather(
         @Query(QUERY_PARAM) location: String, @Query(APPID_PARAM) appid: String = DEFAULT_APPID
-    ): Deferred<TodayOpenWeather>
-
-    @GET("weather2")
-    fun getCurrentWeatherForCity2(
-        @Query(QUERY_PARAM) location: String, @Query(FORMAT_PARAM) format: String = DEFAULT_FORMAT, @Query(UNITS_PARAM) units: String = DEFAULT_UNITS, @Query(
-            DAYS_PARAM
-        ) days: Int = DEFAULT_NUMDAYS, @Query(APPID_PARAM) appid: String = DEFAULT_APPID
     ): Deferred<TodayOpenWeather>
 
     @GET("forecast")
-    fun getForecastWeather(
+    fun getDailyForecast(
         @Query(QUERY_PARAM) location: String, @Query(APPID_PARAM) appid: String = DEFAULT_APPID
-    ): Deferred<ForecastOpenWeather>
+    ): Deferred<DailyForecastOpenWeather>
 
+    @GET("forecast/hourly")
+    fun getHourlyForecast(
+        @Query(QUERY_PARAM) location: String, @Query(APPID_PARAM) appid: String = DEFAULT_APPID
+    ): Deferred<HourlyForecastOpenWeather>
+}
+
+interface WeatherApiServiceProd {
+
+    @GET("weather")
+    fun getCurrentWeather(
+        @Query(QUERY_PARAM) location: String, @Query(APPID_PARAM) appid: String = DEFAULT_APPID, @Query(UNITS_PARAM) units: String = DEFAULT_UNITS
+    ): Deferred<TodayOpenWeather>
+
+    @GET("forecast")
+    fun getDailyForecast(
+        @Query(QUERY_PARAM) location: String, @Query(APPID_PARAM) appid: String = DEFAULT_APPID, @Query(DAYS_PARAM) cnt: Int = DEFAULT_NUMDAYS, @Query(
+            UNITS_PARAM
+        ) units: String = DEFAULT_UNITS
+    ): Deferred<DailyForecastOpenWeather>
+
+    @GET("forecast/hourly")
+    fun getHourlyForecast(
+        @Query(QUERY_PARAM) location: String, @Query(APPID_PARAM) appid: String = DEFAULT_APPID, @Query(UNITS_PARAM) units: String = DEFAULT_UNITS
+    ): Deferred<HourlyForecastOpenWeather>
 }
 
 object WeatherApi {
     val weatherService: WeatherApiService by lazy {
         retrofit.create(WeatherApiService::class.java)
+    }
+    val weatherServiceProd: WeatherApiServiceProd by lazy {
+        retrofit.create(WeatherApiServiceProd::class.java)
     }
 }

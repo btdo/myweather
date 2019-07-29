@@ -30,6 +30,8 @@ object SunshineDateUtils {
     /* Milliseconds in a day */
     val DAY_IN_MILLIS = TimeUnit.DAYS.toMillis(1)
 
+    val HOURS_IN_MILLIS = TimeUnit.HOURS.toMillis(1)
+
     /**
      * This method returns the number of milliseconds (UTC time) for today's date at midnight in
      * the local time zone. For example, if you live in California and the day is September 20th,
@@ -84,6 +86,16 @@ object SunshineDateUtils {
             return TimeUnit.DAYS.toMillis(daysSinceEpochLocal)
         }
 
+    val normalizedUtcDateForTodayHours: Long
+        get() {
+            val utcNowMillis = System.currentTimeMillis()
+            val currentTimeZone = TimeZone.getDefault()
+            val gmtOffsetMillis = currentTimeZone.getOffset(utcNowMillis).toLong()
+            val timeSinceEpochLocalTimeMillis = utcNowMillis + gmtOffsetMillis
+            val hoursSinceEpochLocal = TimeUnit.MILLISECONDS.toHours(timeSinceEpochLocalTimeMillis)
+            return TimeUnit.HOURS.toMillis(hoursSinceEpochLocal)
+        }
+
     /**
      * This method returns the number of days since the epoch (January 01, 1970, 12:00 Midnight UTC)
      * in UTC time from the current date.
@@ -92,8 +104,20 @@ object SunshineDateUtils {
      *
      * @return The number of days from the epoch to the date argument.
      */
-    private fun elapsedDaysSinceEpoch(utcDate: Long): Long {
+    fun elapsedDaysSinceEpoch(utcDate: Long): Long {
         return TimeUnit.MILLISECONDS.toDays(utcDate)
+    }
+
+    /**
+     * This method returns the number of days since the epoch (January 01, 1970, 12:00 Midnight UTC)
+     * in UTC time from the current date.
+     *
+     * @param utcDate A date in milliseconds in UTC time.
+     *
+     * @return The number of days from the epoch to the date argument.
+     */
+    private fun elapsedHoursSinceEpoch(utcDate: Long): Long {
+        return TimeUnit.MILLISECONDS.toHours(utcDate)
     }
 
     /**
@@ -122,9 +146,14 @@ object SunshineDateUtils {
      *
      * @return The UTC date at 12 midnight of the date
      */
-    fun normalizeDate(date: Long): Long {
+    fun normalizeDateToDays(date: Long): Long {
         val daysSinceEpoch = elapsedDaysSinceEpoch(date)
         return daysSinceEpoch * DAY_IN_MILLIS
+    }
+
+    fun normalizeDateToHours(date: Long): Long {
+        val hoursSinceEpoc: Long = elapsedHoursSinceEpoch(date)
+        return hoursSinceEpoc * HOURS_IN_MILLIS
     }
 
     /**
@@ -153,7 +182,7 @@ object SunshineDateUtils {
      *
      * @return The local date corresponding to the given normalized UTC date
      */
-    private fun getLocalMidnightFromNormalizedUtcDate(normalizedUtcDate: Long): Long {
+    fun getLocalMidnightFromNormalizedUtcDate(normalizedUtcDate: Long): Long {
         /* The timeZone object will provide us the current user's time zone offset */
         val timeZone = TimeZone.getDefault()
         /*
@@ -162,6 +191,13 @@ object SunshineDateUtils {
          */
         val gmtOffset = timeZone.getOffset(normalizedUtcDate).toLong()
         return normalizedUtcDate - gmtOffset
+    }
+
+    fun getNumDaysFromToday(normalizedUtcMidnight: Long): Long {
+        val localDate = getLocalMidnightFromNormalizedUtcDate(normalizedUtcMidnight)
+        val daysFromEpochToProvidedDate = elapsedDaysSinceEpoch(localDate)
+        val daysFromEpochToToday = elapsedDaysSinceEpoch(System.currentTimeMillis())
+        return daysFromEpochToProvidedDate - daysFromEpochToToday
     }
 
     /**

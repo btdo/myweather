@@ -19,8 +19,8 @@
         android:label="@string/title_activity_detail"
         tools:layout="@layout/fragment_day_details">
         <argument
-            android:name="dayWeather"
-            app:argType="com.example.myweather.repository.DayWeather" />
+            android:name="forecastItem"
+            app:argType="com.example.myweather.repository.ForecastItem" />
     </fragment>
     <fragment
         android:id="@+id/settings"

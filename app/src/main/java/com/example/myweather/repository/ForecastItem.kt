@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class DayWeather(
+data class ForecastItem(
     val city: String,
     val date: Long,
     val weatherId: Int,
@@ -17,4 +17,13 @@ data class DayWeather(
     val temp: Double,
     val mainDescription: String,
     val description: String
+) : Parcelable
+
+@Parcelize
+data class HourForecast(
+    val city: String,
+    val date: Long,
+    val weatherId: Int,
+    val temp: Double,
+    val windSpeed: Float
 ) : Parcelable

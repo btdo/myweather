@@ -11,31 +11,18 @@
             type="com.example.myweather.ui.HomeFragmentViewModel" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="top|center"
+        android:orientation="vertical"
+        android:padding="@dimen/margin_xlarge"
         tools:context=".ui.HomeFragment">
-
-        <LinearLayout
-            android:id="@+id/headline"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_xlarge"
-            android:layout_marginLeft="@dimen/margin_xlarge"
-            android:layout_marginTop="@dimen/margin_xlarge"
-            android:layout_marginEnd="@dimen/margin_xlarge"
-            android:layout_marginRight="@dimen/margin_xlarge"
-            android:gravity="center"
-            android:orientation="vertical"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/city_name"
                 style="@style/pageTitle"
-                android:layout_marginTop="@dimen/margin_xlarge"
                 android:text="@{viewModel.location}"
                 tools:text="Mountain View" />
 
@@ -44,15 +31,15 @@
                 android:layout_width="96dp"
                 android:layout_height="96dp"
                 android:layout_gravity="center"
-                android:layout_marginTop="@dimen/margin_xlarge"
                 android:adjustViewBounds="true"
+                android:layout_marginTop="@dimen/margin_normal"
                 app:weatherId="@{viewModel.weatherId}"
                 tools:src="@drawable/art_clouds" />
 
             <TextView
                 android:id="@+id/temperature"
                 style="@style/pageSubTitle"
-                android:layout_marginTop="@dimen/margin_xlarge"
+                android:layout_marginTop="@dimen/margin_normal"
                 app:isMetric="@{viewModel.isMetric}"
                 app:temperature="@{viewModel.temperature}"
                 tools:text="18" />
@@ -60,27 +47,21 @@
             <TextView
                 android:id="@+id/description"
                 style="@style/pageSubTitle"
-                android:layout_marginTop="@dimen/margin_xlarge"
+                android:layout_marginTop="@dimen/margin_normal"
                 android:text="@{viewModel.description}"
                 tools:text="Cloudy" />
-        </LinearLayout>
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/forecast"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_xlarge"
-            android:layout_marginLeft="@dimen/margin_xlarge"
             android:layout_marginTop="@dimen/margin_xlarge"
-            android:layout_marginEnd="@dimen/margin_xlarge"
-            android:layout_marginRight="@dimen/margin_xlarge"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/headline"
-            app:listData="@{viewModel.forecastDays}"
+            app:listData="@{viewModel.dailyForecast}"
             tools:itemCount="5"
             tools:listitem="@layout/home_day_forecast_item" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
 </layout>

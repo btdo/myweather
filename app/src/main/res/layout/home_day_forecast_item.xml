@@ -7,13 +7,47 @@
 
         <variable
             name="dayForecast"
-            type="com.example.myweather.repository.DayWeather" />
+            type="com.example.myweather.repository.ForecastItem" />
 
         <variable
             name="isMetric"
             type="Boolean" />
 
     </data>
+    <!--
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/weather_icon"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:weatherId="@{dayForecast.weatherId}"
+                tools:src="@drawable/art_clouds" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent=".1" />
+
+            <TextView
+                android:id="@+id/forecast_date"
+                style="@style/forecastDescription"
+                app:date="@{dayForecast.date}"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toTopOf="@+id/weather_icon"
+                tools:text="Monday" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>-->
 
     <LinearLayout
         android:id="@+id/day_forecast_item"

@@ -39,6 +39,14 @@ object SunshineWeatherUtils {
         return temperatureInCelsius * 1.8 + 32
     }
 
+    private fun kelvinToCelsius(temperatureInKelvin: Double): Double {
+        return temperatureInKelvin - 273.15
+    }
+
+    private fun kelvinToFahrenheit(temperatureInKelvin: Double): Double {
+        return temperatureInKelvin * 1.8 - 459.67
+    }
+
     /**
      * Temperature data is stored in Celsius by our app. Depending on the user's preference,
      * the app may need to display the temperature in Fahrenheit. This method will perform that
@@ -46,22 +54,18 @@ object SunshineWeatherUtils {
      * decimal points show. Temperatures will be formatted to the following form: "21°"
      *
      * @param context     Android Context to access preferences and resources
-     * @param temperature Temperature in degrees Celsius (°C)
+     * @param temperature Temperature in degrees Kelvin
      *
      * @return Formatted temperature String in the following form:
      * "21°"
      */
     fun formatTemperature(context: Context, temperature: Double, isMetric: Boolean): String {
-        var temperature = temperature
-        if (!isMetric) {
-            temperature = celsiusToFahrenheit(temperature)
-        }
-
+        var temperature = if (isMetric) kelvinToCelsius(temperature) else kelvinToFahrenheit(temperature)
         val temperatureFormatResourceId = R.string.format_temperature
-
         /* For presentation, assume the user doesn't care about tenths of a degree. */
         return String.format(context.getString(temperatureFormatResourceId), temperature)
     }
+
 
     /**
      * This method will format the temperatures to be displayed in the

@@ -1,8 +1,10 @@
 package com.example.myweather.network
 
-import com.example.myweather.repository.DayWeather
+import com.example.myweather.database.ForecastItemEntity
+import com.example.myweather.repository.ForecastItem
+import com.example.myweather.repository.HourForecast
+import com.example.myweather.utils.SunshineDateUtils
 import com.squareup.moshi.Json
-
 
 data class TodayOpenWeather(
     val base: String,
@@ -19,8 +21,8 @@ data class TodayOpenWeather(
     val wind: Wind
 )
 
-fun TodayOpenWeather.asDomainModel(): DayWeather {
-    return DayWeather(
+fun TodayOpenWeather.asDomainModel(): ForecastItem {
+    return ForecastItem(
         name,
         dt,
         weather[0].id,
@@ -36,32 +38,42 @@ fun TodayOpenWeather.asDomainModel(): DayWeather {
     )
 }
 
-data class ForecastOpenWeather(
+fun TodayOpenWeather.asDatabaseModel(): ForecastItemEntity {
+    return ForecastItemEntity(
+        name.trim().toLowerCase(),
+        SunshineDateUtils.normalizeDateToHours(dt),
+        weather[0].id,
+        main.temp_min,
+        main.temp_max,
+        main.humidity,
+        main.pressure,
+        wind.speed,
+        wind.deg,
+        main.temp,
+        weather.get(0).main,
+        weather.get(0).description
+    )
+}
+
+data class DailyForecastOpenWeather(
     val city: City,
     val cnt: Int,
     val cod: String,
     val list: List<Day>,
     val message: Double
-) {
-    data class Day(
-        val clouds: Clouds,
-        val dt: Long,
-        val dt_txt: String,
-        val main: Main,
-        val rain: Rain?,
-        val snow: Snow?,
-        val sys: Sys,
-        val weather: List<Weather>,
-        val wind: Wind
-    )
+)
 
-    data class City(
-        val coord: Coord,
-        val country: String,
-        val id: Int,
-        val name: String
-    )
-}
+data class Day(
+    val clouds: Clouds,
+    val dt: Long,
+    val dt_txt: String,
+    val main: Main,
+    val rain: Rain?,
+    val snow: Snow?,
+    val sys: Sys,
+    val weather: List<Weather>,
+    val wind: Wind
+)
 
 data class Wind(
     val deg: Float,
@@ -113,15 +125,13 @@ data class Snow(
     @Json(name = "3h") val _3h: String?
 )
 
-fun ForecastOpenWeather.asDomainModel(): List<DayWeather> {
-
-    val forecastDaysWeather = arrayListOf<DayWeather>()
-
+fun DailyForecastOpenWeather.asDomainModel(): List<ForecastItem> {
+    val forecastDaysWeather = arrayListOf<ForecastItem>()
     list.map { forecastDay ->
         forecastDaysWeather.add(
-            DayWeather(
+            ForecastItem(
                 city.name,
-                forecastDay.dt,
+                SunshineDateUtils.normalizeDateToHours(forecastDay.dt),
                 forecastDay.weather.get(0).id,
                 forecastDay.main.temp_min,
                 forecastDay.main.temp_max,
@@ -137,4 +147,72 @@ fun ForecastOpenWeather.asDomainModel(): List<DayWeather> {
     }
 
     return forecastDaysWeather
+}
+
+fun DailyForecastOpenWeather.asDatabaseModel(): List<ForecastItemEntity> {
+    val forecastDaysWeather = arrayListOf<ForecastItemEntity>()
+    list.map { forecastDay ->
+        forecastDaysWeather.add(
+            ForecastItemEntity(
+                city.name,
+                SunshineDateUtils.normalizeDateToHours(forecastDay.dt),
+                forecastDay.weather.get(0).id,
+                forecastDay.main.temp_min,
+                forecastDay.main.temp_max,
+                forecastDay.main.humidity,
+                forecastDay.main.pressure,
+                forecastDay.wind.speed,
+                forecastDay.wind.deg,
+                forecastDay.main.temp,
+                forecastDay.weather.get(0).main,
+                forecastDay.weather.get(0).description
+            )
+        )
+    }
+
+    return forecastDaysWeather
+}
+
+data class City(
+    val coord: Coord,
+    val country: String,
+    val id: Int,
+    val name: String,
+    val population: Int?
+)
+
+data class HourlyForecastOpenWeather(
+    val city: City,
+    val cnt: Int,
+    val cod: String,
+    val list: List<HourlyOpenWeather>,
+    val message: Double
+)
+
+data class HourlyOpenWeather(
+    val clouds: Clouds,
+    val dt: Long,
+    val dt_txt: String,
+    val main: Main,
+    val rain: Rain,
+    val sys: Sys,
+    val weather: List<Weather>,
+    val wind: Wind
+)
+
+fun HourlyForecastOpenWeather.asDomainModel(): List<HourForecast> {
+    val hoursForecast = arrayListOf<HourForecast>()
+    list.map { forecastDay ->
+        hoursForecast.add(
+            HourForecast(
+                city.name,
+                forecastDay.dt,
+                forecastDay.weather.get(0).id,
+                forecastDay.main.temp,
+                forecastDay.wind.speed
+            )
+        )
+    }
+
+    return hoursForecast
 }

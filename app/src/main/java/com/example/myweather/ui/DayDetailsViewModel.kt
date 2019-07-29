@@ -2,11 +2,11 @@ package com.example.myweather.ui
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.example.myweather.repository.DayWeather
+import com.example.myweather.repository.ForecastItem
 
-class DayDetailsViewModel(application: Application, dayWeather: DayWeather) : AndroidViewModel(application) {
+class DayDetailsViewModel(application: Application, forecastItem: ForecastItem) : AndroidViewModel(application) {
 
-    private val _selectedDay = MutableLiveData<DayWeather>()
+    private val _selectedDay = MutableLiveData<ForecastItem>()
     private val _isMetric = MutableLiveData<Boolean>()
 
     val isMetric: LiveData<Boolean>
@@ -16,7 +16,7 @@ class DayDetailsViewModel(application: Application, dayWeather: DayWeather) : An
 
 
     init {
-        _selectedDay.value = dayWeather
+        _selectedDay.value = forecastItem
         _isMetric.value = true
     }
 
@@ -59,13 +59,13 @@ class DayDetailsViewModel(application: Application, dayWeather: DayWeather) : An
 
 }
 
-class DayDetailsViewModelFactory(private val application: Application, private val dayWeather: DayWeather) :
+class DayDetailsViewModelFactory(private val application: Application, private val forecastItem: ForecastItem) :
     ViewModelProvider.Factory {
 
     @Suppress("unchecked_cast")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(DayDetailsViewModel::class.java)) {
-            return DayDetailsViewModel(application, dayWeather) as T
+            return DayDetailsViewModel(application, forecastItem) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

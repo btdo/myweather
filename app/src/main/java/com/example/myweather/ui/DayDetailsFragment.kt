@@ -21,7 +21,7 @@ class DayDetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val application = requireNotNull(activity).application
-        val selectedDay = DayDetailsFragmentArgs.fromBundle(arguments!!).dayWeather
+        val selectedDay = DayDetailsFragmentArgs.fromBundle(arguments!!).forecastItem
         val viewModelFactory = DayDetailsViewModelFactory(application, selectedDay)
 
         val binding = FragmentDayDetailsBinding.inflate(inflater)

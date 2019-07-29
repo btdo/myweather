@@ -5,7 +5,7 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myweather.R
-import com.example.myweather.repository.DayWeather
+import com.example.myweather.repository.ForecastItem
 import com.example.myweather.utils.SunshineDateUtils
 import com.example.myweather.utils.SunshineWeatherUtils
 
@@ -34,7 +34,7 @@ fun bindDescription(view: TextView, weatherId: Int) {
 @BindingAdapter("listData")
 fun bindRecyclerView(
     recyclerView: RecyclerView,
-    data: List<DayWeather>?
+    data: List<ForecastItem>?
 ) {
     val adapter = recyclerView.adapter as ForecastAdapter
     adapter.submitList(data)
@@ -49,11 +49,13 @@ fun bindWindSpeed(view: TextView, windSpeed: Float, degrees: Float, isMetric: Bo
     view.contentDescription = windA11y
 }
 
-
+/**
+ * dt: unix time from server (total of seconds from at the Unix Epoch on January 1st, 1970 at UTC)
+ */
 @BindingAdapter("date")
 fun bindDate(view: TextView, dt: Long) {
-    val dateString = SunshineDateUtils.getFriendlyDateString(view.context, dt, false)
-    view.text = dateString
+    val normalizedUTCDate = SunshineDateUtils.normalizeDateToDays(dt * 1000)
+    view.text = SunshineDateUtils.getFriendlyDateString(view.context, normalizedUTCDate, false)
 }
 
 

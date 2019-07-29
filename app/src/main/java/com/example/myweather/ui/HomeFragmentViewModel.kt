@@ -2,7 +2,8 @@ package com.example.myweather.ui
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.example.myweather.repository.DayWeather
+import com.example.myweather.repository.ForecastItem
+import com.example.myweather.repository.HourForecast
 import com.example.myweather.repository.WeatherRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,12 +24,12 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     val showError: LiveData<Boolean>
         get() = _showError
 
-    private val _viewSelectedDay = MutableLiveData<DayWeather>()
+    private val _viewSelectedDay = MutableLiveData<ForecastItem>()
 
-    val viewSelectedDay: LiveData<DayWeather>
+    val viewSelectedDay: LiveData<ForecastItem>
         get() = _viewSelectedDay
 
-    private val _location = MutableLiveData<String>().apply { this.value = initLocation }
+    private val _location = MutableLiveData<String>()
 
 
     /**
@@ -48,9 +49,11 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
 
     private val repository = WeatherRepository()
 
-    private val _todayWeather = MutableLiveData<DayWeather>()
+    private val _todayWeather = MutableLiveData<ForecastItem>()
 
-    private val _forecastDays = MutableLiveData<List<DayWeather>>()
+    private val _dailyForecast = MutableLiveData<List<ForecastItem>>()
+
+    private val _hourlyForecast = MutableLiveData<List<HourForecast>>()
 
     val location: LiveData<String>
         get() {
@@ -69,9 +72,14 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         it.weatherId
     }
 
-    val forecastDays: LiveData<List<DayWeather>>
+    val dailyForecast: LiveData<List<ForecastItem>>
         get() {
-            return _forecastDays
+            return _dailyForecast
+        }
+
+    val hourlyForecast: LiveData<List<HourForecast>>
+        get() {
+            return _hourlyForecast
         }
 
     private val _isMetric = MutableLiveData<Boolean>().apply { this.value = true }
@@ -82,12 +90,11 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         }
 
     init {
-        getTodayWeather(initLocation)
-        getForecastWeather(initLocation)
+        onLocationChanged(initLocation)
     }
 
-    fun viewSelectedDay(dayWeather: DayWeather) {
-        _viewSelectedDay.value = dayWeather
+    fun viewSelectedDay(forecastItem: ForecastItem) {
+        _viewSelectedDay.value = forecastItem
     }
 
     fun viewSelectedDayComplete() {
@@ -101,7 +108,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     private fun getTodayWeather(city: String) {
         viewModelScope.launch {
             try {
-                val cityWeather = repository.getTodayWeather(city)
+                val cityWeather = repository.getTodayForecast(city)
                 _todayWeather.value = cityWeather
                 _showError.value = false
             } catch (e: Exception) {
@@ -111,11 +118,11 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         }
     }
 
-    private fun getForecastWeather(city: String) {
+    private fun getDailyForecast(city: String) {
         viewModelScope.launch {
             try {
-                val forecastWeather = repository.getForecastWeather(city)
-                _forecastDays.value = forecastWeather
+                val dailyForecast = repository.getDaysForecast(city)
+                _dailyForecast.value = dailyForecast
                 _showError.value = false
             } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.
@@ -127,7 +134,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     fun onLocationChanged(city: String) {
         _location.value = city
         getTodayWeather(city)
-        getForecastWeather(city)
+        getDailyForecast(city)
     }
 
     /**
