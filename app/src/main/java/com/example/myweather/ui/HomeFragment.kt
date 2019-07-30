@@ -68,7 +68,7 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, pref: String) {
         if (pref == resources.getString(R.string.pref_location_key)) {
-            viewModel.onLocationChanged(
+            viewModel.onLocation(
                 sharedPreferences.getString(
                     pref,
                     resources.getString(R.string.pref_location_default)
@@ -92,9 +92,14 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return NavigationUI.onNavDestinationSelected(
-            item,
-            view!!.findNavController()
-        ) || super.onOptionsItemSelected(item)
+        if (item.itemId == R.id.refresh) {
+            viewModel.refresh()
+            return true
+        } else {
+            return NavigationUI.onNavDestinationSelected(
+                item,
+                view!!.findNavController()
+            ) || super.onOptionsItemSelected(item)
+        }
     }
 }

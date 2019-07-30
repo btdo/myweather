@@ -121,10 +121,10 @@ object SunshineDateUtils {
     }
 
     /**
-     * Normalizes a date (in milliseconds).
+     * Normalizes a dt (in milliseconds).
      *
-     * Normalize, in our usage within Sunshine means to convert a given date in milliseconds to
-     * the very beginning of the date in UTC time.
+     * Normalize, in our usage within Sunshine means to convert a given dt in milliseconds to
+     * the very beginning of the dt in UTC time.
      *
      * For example, given the time representing
      *
@@ -134,25 +134,25 @@ object SunshineDateUtils {
      *
      * Friday, 9/16/2016, 00:00:00 GMT (1473984000000)
      *
-     * To make it easy to query for the exact date, we normalize all dates that go into
-     * the database to the start of the day in UTC time. In order to normalize the date, we take
+     * To make it easy to query for the exact dt, we normalize all dates that go into
+     * the database to the start of the day in UTC time. In order to normalize the dt, we take
      * advantage of simple integer division, noting that any remainder is discarded when dividing
      * two integers.
      *
      * For example, dividing 7 / 3 (when using integer division) equals 2, not 2.333 repeating
      * as you may expect.
      *
-     * @param date The date (in milliseconds) to normalize
+     * @param dt The dt (in milliseconds) to normalize
      *
-     * @return The UTC date at 12 midnight of the date
+     * @return The UTC dt at 12 midnight of the dt
      */
-    fun normalizeDateToDays(date: Long): Long {
-        val daysSinceEpoch = elapsedDaysSinceEpoch(date)
+    fun normalizeDateToDays(dt: Long): Long {
+        val daysSinceEpoch = elapsedDaysSinceEpoch(dt)
         return daysSinceEpoch * DAY_IN_MILLIS
     }
 
-    fun normalizeDateToHours(date: Long): Long {
-        val hoursSinceEpoc: Long = elapsedHoursSinceEpoch(date)
+    fun normalizeDateToHours(dt: Long): Long {
+        val hoursSinceEpoc: Long = elapsedHoursSinceEpoch(dt)
         return hoursSinceEpoc * HOURS_IN_MILLIS
     }
 

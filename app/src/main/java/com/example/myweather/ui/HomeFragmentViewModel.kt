@@ -2,8 +2,8 @@ package com.example.myweather.ui
 
 import android.app.Application
 import androidx.lifecycle.*
+import com.example.myweather.database.ForecastItemDatabase
 import com.example.myweather.repository.ForecastItem
-import com.example.myweather.repository.HourForecast
 import com.example.myweather.repository.WeatherRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +16,6 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
      * way to set this value to observers.
      */
     private var _showError = MutableLiveData<Boolean>()
-
     /**
      * Event triggered for network error. Views should use this to get access
      * to the data.
@@ -30,6 +29,10 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         get() = _viewSelectedDay
 
     private val _location = MutableLiveData<String>()
+    val location: LiveData<String>
+        get() {
+            return _location
+        }
 
 
     /**
@@ -47,40 +50,21 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
      */
     private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
-    private val repository = WeatherRepository()
+    private val repository = WeatherRepository(ForecastItemDatabase.getInstance(application))
 
-    private val _todayWeather = MutableLiveData<ForecastItem>()
-
-    private val _dailyForecast = MutableLiveData<List<ForecastItem>>()
-
-    private val _hourlyForecast = MutableLiveData<List<HourForecast>>()
-
-    val location: LiveData<String>
-        get() {
-            return _location
-        }
-
-    val description: LiveData<String> = Transformations.map(_todayWeather) {
+    val description: LiveData<String> = Transformations.map(repository.todayForecast) {
         it.mainDescription
     }
 
-    val temperature: LiveData<Double> = Transformations.map(_todayWeather) {
+    val temperature: LiveData<Double> = Transformations.map(repository.todayForecast) {
         it.temp
     }
 
-    val weatherId: LiveData<Int> = Transformations.map(_todayWeather) {
+    val weatherId: LiveData<Int> = Transformations.map(repository.todayForecast) {
         it.weatherId
     }
 
-    val dailyForecast: LiveData<List<ForecastItem>>
-        get() {
-            return _dailyForecast
-        }
-
-    val hourlyForecast: LiveData<List<HourForecast>>
-        get() {
-            return _hourlyForecast
-        }
+    val dailyForecast = repository.dailyForecast
 
     private val _isMetric = MutableLiveData<Boolean>().apply { this.value = true }
 
@@ -90,7 +74,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         }
 
     init {
-        onLocationChanged(initLocation)
+        onLocation(initLocation)
     }
 
     fun viewSelectedDay(forecastItem: ForecastItem) {
@@ -108,8 +92,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     private fun getTodayWeather(city: String) {
         viewModelScope.launch {
             try {
-                val cityWeather = repository.getTodayForecast(city)
-                _todayWeather.value = cityWeather
+                repository.getCurrentForecast(city)
                 _showError.value = false
             } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.
@@ -121,8 +104,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     private fun getDailyForecast(city: String) {
         viewModelScope.launch {
             try {
-                val dailyForecast = repository.getDaysForecast(city)
-                _dailyForecast.value = dailyForecast
+                repository.getDaysForecast(city)
                 _showError.value = false
             } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.
@@ -131,10 +113,16 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         }
     }
 
-    fun onLocationChanged(city: String) {
+    fun onLocation(city: String) {
         _location.value = city
         getTodayWeather(city)
         getDailyForecast(city)
+    }
+
+    fun refresh() {
+        _location.value?.let {
+            onLocation(it)
+        }
     }
 
     /**

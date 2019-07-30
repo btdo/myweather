@@ -12,6 +12,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRepositoryInterface {
+    companion object {
+        @JvmField
+        val MIN_ITEM_FORCAST_ITEMS = 40
+    }
 
     val todayForecast: LiveData<ForecastItem>
         get() {
@@ -20,39 +24,48 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
 
     private val _todayForecast = MutableLiveData<ForecastItem>()
 
-    val dailyForecast: LiveData<ForecastItem>
+    val dailyForecast: LiveData<List<ForecastItem>>
         get() {
             return _dailyForecast
         }
 
-    private val _dailyForecast = MutableLiveData<ForecastItem>()
+    private val _dailyForecast = MutableLiveData<List<ForecastItem>>()
 
 
-    override suspend fun getTodayForecast(city: String) {
+    override suspend fun getCurrentForecast(city: String) {
         withContext(Dispatchers.IO) {
-            var dbItem = database.forecastItemDao.query(SunshineDateUtils.normalizedUtcDateForTodayHours, city)
+            val currentDateTime = SunshineDateUtils.normalizedUtcDateForTodayHours
+            var dbItem = database.forecastItemDao.query(currentDateTime, city.trim().toLowerCase())
             if (dbItem == null) {
                 val networkItem = WeatherApi.weatherService.getCurrentWeather(city).await()
                 dbItem = networkItem.asDatabaseModel()
                 database.forecastItemDao.insert(dbItem)
             }
-            _todayForecast.value = dbItem.asDomainModel()
+
+            _todayForecast.postValue(dbItem.asDomainModel())
         }
     }
 
     override suspend fun getDaysForecast(city: String) {
         withContext(Dispatchers.IO) {
-            var forecastItemsDb =
-                database.forecastItemDao.queryFutureWeatherItems(SunshineDateUtils.normalizedUtcDateForTodayHours, city)
-            var lastItem = if (forecastItemsDb == null) null else forecastItemsDb.get(forecastItemsDb.lastIndex)
-            // TODO: check that there are at least 40 items in the list ( 8 intervals of 3 hours from current time * 5 days = 40)
+            val currentDateTime = SunshineDateUtils.normalizedUtcDateForTodayHours
+            val forecastItems: List<ForecastItem>
+            val forecastItemsDb =
+                database.forecastItemDao.queryFutureWeatherItems(currentDateTime, city)
+            if (forecastItemsDb.size < MIN_ITEM_FORCAST_ITEMS) {
+                val forecastWeather = WeatherApi.weatherService.getDailyForecast(city).await()
+                forecastItems = forecastWeather.asDomainModel().filter { item -> item.date > currentDateTime }
+                val dbItems = forecastWeather.asDatabaseModel().filter { item -> item.date > currentDateTime }
+                database.forecastItemDao.insertAll(dbItems)
+            } else {
+                forecastItems = forecastItemsDb.map { item ->
+                    item.asDomainModel()
+                }
+            }
+
+            _dailyForecast.postValue(forecastItems)
         }
 
-    }
-
-    private suspend fun getNetworkDailyForecast(city: String): List<ForecastItem> {
-        val forecastWeather = WeatherApi.weatherService.getDailyForecast(city).await()
-        return forecastWeather.asDomainModel()
     }
 
 }

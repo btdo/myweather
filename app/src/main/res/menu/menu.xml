@@ -11,6 +11,4 @@
         android:id="@+id/refresh"
         android:title="@string/action_refresh"
         app:showAsAction="never" />
-
-
 </menu>
