@@ -13,8 +13,7 @@ import kotlinx.coroutines.withContext
 
 class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRepositoryInterface {
     companion object {
-        @JvmField
-        val MIN_ITEM_FORCAST_ITEMS = 40
+        const val MIN_ITEM_FORCAST_ITEMS = 40
     }
 
     val todayForecast: LiveData<ForecastItem>

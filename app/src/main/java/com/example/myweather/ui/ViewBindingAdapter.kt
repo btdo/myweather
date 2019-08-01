@@ -49,13 +49,15 @@ fun bindWindSpeed(view: TextView, windSpeed: Float, degrees: Float, isMetric: Bo
     view.contentDescription = windA11y
 }
 
-/**
- * dt: unix time from server (total of seconds from at the Unix Epoch on January 1st, 1970 at UTC)
- */
 @BindingAdapter("date")
 fun bindDate(view: TextView, dt: Long) {
-    val normalizedUTCDate = SunshineDateUtils.normalizeDateToDays(dt * 1000)
-    view.text = SunshineDateUtils.getFriendlyDateString(view.context, normalizedUTCDate, false)
+    view.text = SunshineDateUtils.getFriendlyDateString(view.context, dt, false)
+    val test = SunshineDateUtils.getFriendlyDateHourString(view.context, dt)
+}
+
+@BindingAdapter("hour")
+fun bindHour(view: TextView, dt: Long) {
+    view.text = SunshineDateUtils.getFriendlyDateHourString(view.context, dt)
 }
 
 

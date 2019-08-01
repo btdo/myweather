@@ -281,6 +281,12 @@ object SunshineDateUtils {
         }
     }
 
+    fun getFriendlyDateHourString(context: Context, normalizedUtcMidnight: Long): String {
+        val localDate = getLocalMidnightFromNormalizedUtcDate(normalizedUtcMidnight)
+        val localizedHour = SimpleDateFormat("haaa").format(localDate)
+        return localizedHour
+    }
+
     /**
      * Returns a date string in the format specified, which shows an abbreviated date without a
      * year.

@@ -60,7 +60,7 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
             }
         })
 
-        PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+        PreferenceManager.getDefaultSharedPreferences(activity)
             .registerOnSharedPreferenceChangeListener(this)
         setHasOptionsMenu(true)
         return binding.root
@@ -95,11 +95,11 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         if (item.itemId == R.id.refresh) {
             viewModel.refresh()
             return true
-        } else {
-            return NavigationUI.onNavDestinationSelected(
-                item,
-                view!!.findNavController()
-            ) || super.onOptionsItemSelected(item)
         }
+
+        return NavigationUI.onNavDestinationSelected(
+            item,
+            view!!.findNavController()
+        ) || super.onOptionsItemSelected(item)
     }
 }

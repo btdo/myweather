@@ -64,7 +64,13 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         it.weatherId
     }
 
-    val dailyForecast = repository.dailyForecast
+    val dailyForecast: LiveData<List<ForecastItem>> = Transformations.map(repository.dailyForecast) {
+        it.subList(5, it.lastIndex)
+    }
+
+    val hourlyForecast: LiveData<List<ForecastItem>> = Transformations.map(repository.dailyForecast) {
+        it.subList(0, 5)
+    }
 
     private val _isMetric = MutableLiveData<Boolean>().apply { this.value = true }
 
