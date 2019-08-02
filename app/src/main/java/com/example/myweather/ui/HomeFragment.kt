@@ -11,6 +11,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myweather.R
 import com.example.myweather.databinding.FragmentHomeBinding
 
@@ -36,11 +37,16 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
 
-        val adapter = ForecastAdapter(context!!, viewModel.isMetric.value ?: true, ForecastClickListener { day ->
+        val adapter = DailyForecastAdapter(context!!, viewModel.isMetric.value ?: true, ForecastClickListener { day ->
             viewModel.viewSelectedDay(day)
         })
 
-        binding.forecast.adapter = adapter
+        binding.dailyForecast.adapter = adapter
+
+        val hourlyAdapter = HourlyForecastAdapter(context!!, viewModel.isMetric.value ?: true)
+        binding.hourlyForecast.adapter = hourlyAdapter
+        binding.hourlyForecast.layoutManager = LinearLayoutManager(context!!, LinearLayoutManager.HORIZONTAL, false)
+
 
         viewModel.isMetric.observe(this, Observer { isMetric ->
             adapter.mIsMetric = isMetric ?: true

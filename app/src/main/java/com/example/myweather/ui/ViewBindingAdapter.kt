@@ -31,12 +31,21 @@ fun bindDescription(view: TextView, weatherId: Int) {
     view.contentDescription = descriptionA11y
 }
 
-@BindingAdapter("listData")
-fun bindRecyclerView(
+@BindingAdapter("dailyList")
+fun bindDailyForecastRecyclerView(
     recyclerView: RecyclerView,
     data: List<ForecastItem>?
 ) {
-    val adapter = recyclerView.adapter as ForecastAdapter
+    val adapter = recyclerView.adapter as DailyForecastAdapter
+    adapter.submitList(data)
+}
+
+@BindingAdapter("hourlyList")
+fun bindHourlyForecastRecyclerView(
+    recyclerView: RecyclerView,
+    data: List<ForecastItem>?
+) {
+    val adapter = recyclerView.adapter as HourlyForecastAdapter
     adapter.submitList(data)
 }
 
@@ -52,7 +61,6 @@ fun bindWindSpeed(view: TextView, windSpeed: Float, degrees: Float, isMetric: Bo
 @BindingAdapter("date")
 fun bindDate(view: TextView, dt: Long) {
     view.text = SunshineDateUtils.getFriendlyDateString(view.context, dt, false)
-    val test = SunshineDateUtils.getFriendlyDateHourString(view.context, dt)
 }
 
 @BindingAdapter("hour")

@@ -6,25 +6,28 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myweather.databinding.HomeDayForecastItemBinding
+import com.example.myweather.databinding.HourlyForecastItemBinding
 import com.example.myweather.repository.ForecastItem
 
-class ForecastAdapter(
+class HourlyForecastAdapter(
     private val mContext: Context,
     var mIsMetric: Boolean,
-    private var clickListener: ForecastClickListener
+    private var clickListener: HourlyForecastClickListener? = null
 ) :
-    ListAdapter<ForecastItem, ForecastAdapter.DayForecastViewHolder>(DiffCallback) {
+    ListAdapter<ForecastItem, HourlyForecastAdapter.HourlyForecastViewHolder>(DiffCallback) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayForecastViewHolder {
-        return DayForecastViewHolder(mContext, HomeDayForecastItemBinding.inflate(LayoutInflater.from(parent.context)))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HourlyForecastViewHolder {
+        return HourlyForecastViewHolder(
+            mContext,
+            HourlyForecastItemBinding.inflate(LayoutInflater.from(parent.context))
+        )
     }
 
-    override fun onBindViewHolder(holder: DayForecastViewHolder, position: Int) {
-        val dayForecast = getItem(position)
-        holder.bind(dayForecast, mIsMetric)
+    override fun onBindViewHolder(holder: HourlyForecastViewHolder, position: Int) {
+        val hourForecast = getItem(position)
+        holder.bind(hourForecast, mIsMetric)
         holder.itemView.setOnClickListener {
-            clickListener.onClick(dayForecast)
+            clickListener?.onClick(hourForecast)
         }
     }
 
@@ -38,17 +41,17 @@ class ForecastAdapter(
         }
     }
 
-    class DayForecastViewHolder(private val mContext: Context, private var binding: HomeDayForecastItemBinding) :
+    class HourlyForecastViewHolder(private val mContext: Context, private var binding: HourlyForecastItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(dayForecast: ForecastItem, isMetric: Boolean) {
-            binding.dayForecast = dayForecast
+        fun bind(hourForecast: ForecastItem, isMetric: Boolean) {
+            binding.hourlyForecast = hourForecast
             binding.isMetric = isMetric
             binding.executePendingBindings()
         }
     }
 }
 
-class ForecastClickListener(val clickListener: (day: ForecastItem) -> Unit) {
+class HourlyForecastClickListener(val clickListener: (hour: ForecastItem) -> Unit) {
     fun onClick(forecastItem: ForecastItem) = clickListener(forecastItem)
 }
