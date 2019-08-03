@@ -14,93 +14,52 @@
             type="Boolean" />
 
     </data>
-    <!--
-        <androidx.constraintlayout.widget.ConstraintLayout
+
+    <RelativeLayout
+        android:id="@+id/day_forecast_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/forecast_date"
+                style="@style/forecastDescription"
+                android:layout_weight="1"
+                app:date="@{dayForecast.date}"
+                tools:text="Monday" />
 
             <ImageView
                 android:id="@+id/weather_icon"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_gravity="center"
+                android:layout_weight="1"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 app:weatherId="@{dayForecast.weatherId}"
                 tools:src="@drawable/art_clouds" />
 
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_percent=".1" />
+            <TextView
+                android:id="@+id/forecast_condition"
+                style="@style/forecastDescription"
+                android:layout_weight="1"
+                app:weatherId="@{dayForecast.weatherId}"
+                tools:text="Cloudy" />
 
             <TextView
-                android:id="@+id/forecast_date"
+                android:id="@+id/forecast_temp"
                 style="@style/forecastDescription"
-                app:date="@{dayForecast.date}"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toTopOf="@+id/weather_icon"
-                tools:text="Monday" />
+                android:layout_weight="1"
+                app:isMetric="@{isMetric}"
+                app:temperature="@{dayForecast.temp}"
+                tools:text="13" />
+
+        </LinearLayout>
 
 
-        </androidx.constraintlayout.widget.ConstraintLayout>-->
-
-    <LinearLayout
-        android:id="@+id/day_forecast_item"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_large"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/forecast_date"
-            app:date="@{dayForecast.date}"
-            style="@style/forecastDescription"
-            tools:text="Monday" />
-
-        <ImageView
-            android:id="@+id/weather_icon"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_gravity="center"
-            android:layout_marginStart="@dimen/margin_xxlarge"
-            android:layout_marginLeft="@dimen/margin_xxlarge"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            app:weatherId="@{dayForecast.weatherId}"
-            tools:src="@drawable/art_clouds" />
-
-        <TextView
-            android:id="@+id/forecast_condition"
-            style="@style/forecastDescription"
-            android:layout_marginStart="@dimen/margin_xxlarge"
-            android:layout_marginLeft="@dimen/margin_xxlarge"
-            app:weatherId="@{dayForecast.weatherId}"
-            tools:text="Cloudy" />
-
-        <TextView
-            android:id="@+id/forecast_temp"
-            style="@style/forecastDescription"
-            android:layout_marginStart="@dimen/margin_xxlarge"
-            android:layout_marginLeft="@dimen/margin_xxlarge"
-            app:isMetric="@{isMetric}"
-            app:temperature="@{dayForecast.temp}"
-            tools:text="13" />
-
-        <TextView
-            android:id="@+id/forecast_windspeed"
-            style="@style/forecastDescription"
-            android:layout_marginStart="@dimen/margin_xxlarge"
-            android:layout_marginLeft="@dimen/margin_xxlarge"
-            app:degrees="@{dayForecast.degrees}"
-            app:isMetric="@{isMetric}"
-            app:windSpeed="@{dayForecast.windSpeed}"
-            tools:text="25 km/h" />
-
-    </LinearLayout>
+    </RelativeLayout>
 </layout>
