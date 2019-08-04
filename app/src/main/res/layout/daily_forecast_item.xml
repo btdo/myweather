@@ -27,8 +27,8 @@
 
             <TextView
                 android:id="@+id/forecast_date"
+                android:layout_width="100dp"
                 style="@style/forecastDescription"
-                android:layout_weight="1"
                 app:date="@{dayForecast.date}"
                 tools:text="Monday" />
 
@@ -37,29 +37,29 @@
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_gravity="center"
-                android:layout_weight="1"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
                 app:weatherId="@{dayForecast.weatherId}"
                 tools:src="@drawable/art_clouds" />
 
             <TextView
+                android:layout_width="150dp"
                 android:id="@+id/forecast_condition"
+                android:layout_marginLeft="@dimen/margin_xxxxlarge"
                 style="@style/forecastDescription"
-                android:layout_weight="1"
                 app:weatherId="@{dayForecast.weatherId}"
                 tools:text="Cloudy" />
 
             <TextView
                 android:id="@+id/forecast_temp"
+                android:layout_width="20dp"
+                android:layout_weight=".1"
                 style="@style/forecastDescription"
-                android:layout_weight="1"
                 app:isMetric="@{isMetric}"
                 app:temperature="@{dayForecast.temp}"
                 tools:text="13" />
 
         </LinearLayout>
-
 
     </RelativeLayout>
 </layout>
