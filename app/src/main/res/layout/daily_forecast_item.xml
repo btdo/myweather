@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="dayForecast"
             type="com.example.myweather.repository.ForecastItem" />
@@ -12,7 +11,6 @@
         <variable
             name="isMetric"
             type="Boolean" />
-
     </data>
 
     <RelativeLayout
@@ -20,17 +18,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/forecast_date"
-                android:layout_width="100dp"
                 style="@style/forecastDescription"
                 app:date="@{dayForecast.date}"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:text="Monday" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/icon_guideline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.30" />
 
             <ImageView
                 android:id="@+id/weather_icon"
@@ -39,27 +44,43 @@
                 android:layout_gravity="center"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
+                app:layout_constraintLeft_toRightOf="@id/icon_guideline"
+                app:layout_constraintTop_toTopOf="@id/forecast_date"
                 app:weatherId="@{dayForecast.weatherId}"
                 tools:src="@drawable/art_clouds" />
 
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/condition_guideline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.45" />
+
             <TextView
-                android:layout_width="150dp"
                 android:id="@+id/forecast_condition"
-                android:layout_marginLeft="@dimen/margin_xxxxlarge"
                 style="@style/forecastDescription"
+                app:layout_constraintLeft_toLeftOf="@id/condition_guideline"
+                app:layout_constraintTop_toTopOf="@id/forecast_date"
                 app:weatherId="@{dayForecast.weatherId}"
                 tools:text="Cloudy" />
 
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/temperature_guideline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.90" />
+
             <TextView
                 android:id="@+id/forecast_temp"
-                android:layout_width="20dp"
-                android:layout_weight=".1"
+                app:layout_constraintLeft_toLeftOf="@id/temperature_guideline"
+                app:layout_constraintTop_toTopOf="@id/forecast_date"
                 style="@style/forecastDescription"
                 app:isMetric="@{isMetric}"
                 app:temperature="@{dayForecast.temp}"
                 tools:text="13" />
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </RelativeLayout>
 </layout>
