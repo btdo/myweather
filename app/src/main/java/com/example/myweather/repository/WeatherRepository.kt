@@ -31,11 +31,11 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
     private val _dailyForecast = MutableLiveData<List<ForecastItem>>()
 
 
-    override suspend fun getCurrentForecast(city: String) {
+    override suspend fun getCurrentForecast(city: String, isForcedRefresh: Boolean) {
         withContext(Dispatchers.IO) {
-            val currentDateTime = SunshineDateUtils.normalizedUtcDateForTodayHours
+            val currentDateTime = SunshineDateUtils.getCurrentHour()
             var dbItem = database.forecastItemDao.query(currentDateTime, city.trim().toLowerCase())
-            if (dbItem == null) {
+            if (dbItem == null || isForcedRefresh) {
                 val networkItem = WeatherApi.weatherService.getCurrentWeather(city).await()
                 dbItem = networkItem.asDatabaseModel()
                 database.forecastItemDao.insert(dbItem)
@@ -45,13 +45,13 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
         }
     }
 
-    override suspend fun getDaysForecast(city: String) {
+    override suspend fun getDaysForecast(city: String, isForcedRefresh: Boolean) {
         withContext(Dispatchers.IO) {
-            val currentDateTime = SunshineDateUtils.normalizedUtcDateForTodayHours
+            val currentDateTime = SunshineDateUtils.getCurrentHour()
             val forecastItems: List<ForecastItem>
             val forecastItemsDb =
                 database.forecastItemDao.queryFutureWeatherItems(currentDateTime, city)
-            if (forecastItemsDb.size < MIN_ITEM_FORCAST_ITEMS) {
+            if (forecastItemsDb.size < MIN_ITEM_FORCAST_ITEMS || isForcedRefresh) {
                 val forecastWeather = WeatherApi.weatherService.getDailyForecast(city).await()
                 forecastItems = forecastWeather.asDomainModel().filter { item -> item.date > currentDateTime }
                 val dbItems = forecastWeather.asDatabaseModel().filter { item -> item.date > currentDateTime }

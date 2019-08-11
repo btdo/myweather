@@ -60,12 +60,13 @@ fun bindWindSpeed(view: TextView, windSpeed: Float, degrees: Float, isMetric: Bo
 
 @BindingAdapter("date")
 fun bindDate(view: TextView, dt: Long) {
-    view.text = SunshineDateUtils.getFriendlyDateString(view.context, dt, false)
+    val text = SunshineDateUtils.getDayNameForDisplay(view.context, dt)
+    view.text = text
 }
 
 @BindingAdapter("hour")
 fun bindHour(view: TextView, dt: Long) {
-    view.text = SunshineDateUtils.getFriendlyDateHourString(view.context, dt)
+    view.text = SunshineDateUtils.getHourForDisplay(dt)
 }
 
 

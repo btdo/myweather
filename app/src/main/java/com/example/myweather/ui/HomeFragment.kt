@@ -78,7 +78,7 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
                 sharedPreferences.getString(
                     pref,
                     resources.getString(R.string.pref_location_default)
-                )!!
+                )!!, false
             )
         } else if (pref == resources.getString(R.string.pref_units_key)) {
             val isMetric = sharedPreferences.getString(pref, "") == resources.getString(R.string.pref_units_metric)

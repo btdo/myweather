@@ -80,7 +80,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         }
 
     init {
-        onLocation(initLocation)
+        onLocation(initLocation, false)
     }
 
     fun viewSelectedDay(forecastItem: ForecastItem) {
@@ -95,10 +95,10 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         _isMetric.value = isMetric
     }
 
-    private fun getTodayWeather(city: String) {
+    private fun getTodayWeather(city: String, isForcedRefresh: Boolean) {
         viewModelScope.launch {
             try {
-                repository.getCurrentForecast(city)
+                repository.getCurrentForecast(city, isForcedRefresh)
                 _showError.value = false
             } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.
@@ -107,10 +107,10 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         }
     }
 
-    private fun getDailyForecast(city: String) {
+    private fun getDailyForecast(city: String, isForcedRefresh: Boolean) {
         viewModelScope.launch {
             try {
-                repository.getDaysForecast(city)
+                repository.getDaysForecast(city, isForcedRefresh)
                 _showError.value = false
             } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.
@@ -119,15 +119,15 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         }
     }
 
-    fun onLocation(city: String) {
+    fun onLocation(city: String, isForcedRefresh: Boolean) {
         _location.value = city
-        getTodayWeather(city)
-        getDailyForecast(city)
+        getTodayWeather(city, isForcedRefresh)
+        getDailyForecast(city, isForcedRefresh)
     }
 
     fun refresh() {
         _location.value?.let {
-            onLocation(it)
+            onLocation(it, true)
         }
     }
 

@@ -41,7 +41,7 @@ fun TodayOpenWeather.asDomainModel(): ForecastItem {
 fun TodayOpenWeather.asDatabaseModel(): ForecastItemEntity {
     return ForecastItemEntity(
         name.trim().toLowerCase(),
-        SunshineDateUtils.normalizedUtcDateForTodayHours,
+        SunshineDateUtils.getCurrentHour(),
         weather[0].id,
         main.temp_min,
         main.temp_max,
@@ -131,7 +131,7 @@ fun DailyForecastOpenWeather.asDomainModel(): List<ForecastItem> {
         forecastDaysWeather.add(
             ForecastItem(
                 city.name,
-                SunshineDateUtils.normalizeDateToHours(forecastDay.dt * 1000),
+                SunshineDateUtils.normalizeDateTime(forecastDay.dt),
                 forecastDay.weather.get(0).id,
                 forecastDay.main.temp_min,
                 forecastDay.main.temp_max,
@@ -155,7 +155,7 @@ fun DailyForecastOpenWeather.asDatabaseModel(): List<ForecastItemEntity> {
         forecastDaysWeather.add(
             ForecastItemEntity(
                 city.name,
-                SunshineDateUtils.normalizeDateToHours(forecastDay.dt * 1000),
+                SunshineDateUtils.normalizeDateTime(forecastDay.dt),
                 forecastDay.weather.get(0).id,
                 forecastDay.main.temp_min,
                 forecastDay.main.temp_max,
