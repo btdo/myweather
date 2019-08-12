@@ -5,6 +5,7 @@ import androidx.lifecycle.*
 import com.example.myweather.database.ForecastItemDatabase
 import com.example.myweather.repository.ForecastItem
 import com.example.myweather.repository.WeatherRepository
+import com.example.myweather.utils.WeatherUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -65,11 +66,16 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     }
 
     val dailyForecast: LiveData<List<ForecastItem>> = Transformations.map(repository.dailyForecast) {
-        it.subList(10, it.lastIndex)
+        val list = it.subList(8, it.lastIndex)
+
+        WeatherUtils.groupItemsIntoDays(list)
+
+
+        list
     }
 
     val hourlyForecast: LiveData<List<ForecastItem>> = Transformations.map(repository.dailyForecast) {
-        it.subList(0, 9)
+        it.subList(0, 8)
     }
 
     private val _isMetric = MutableLiveData<Boolean>().apply { this.value = true }

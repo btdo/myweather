@@ -73,7 +73,7 @@
 
 
     <!-- - - - - - - - - - - - - - -
-      - Used by SunshineDateUtils  -
+      - Used by DateUtils  -
       - - - - - - - - - - - - - - -->
 
     <!-- For labelling today's forecast -->
@@ -89,7 +89,7 @@
 
 
     <!-- - - - - - - - - - - - - - - - -
-      - Used by SunshineWeatherUtils   -
+      - Used by WeatherUtils   -
       - - - - - - - - - - - - - - - - -->
 
     <!-- Temperature format -->

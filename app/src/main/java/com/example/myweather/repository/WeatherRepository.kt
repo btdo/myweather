@@ -7,7 +7,7 @@ import com.example.myweather.database.asDomainModel
 import com.example.myweather.network.WeatherApi
 import com.example.myweather.network.asDatabaseModel
 import com.example.myweather.network.asDomainModel
-import com.example.myweather.utils.SunshineDateUtils
+import com.example.myweather.utils.DateUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -33,7 +33,7 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
 
     override suspend fun getCurrentForecast(city: String, isForcedRefresh: Boolean) {
         withContext(Dispatchers.IO) {
-            val currentDateTime = SunshineDateUtils.getCurrentHour()
+            val currentDateTime = DateUtils.getCurrentHour()
             var dbItem = database.forecastItemDao.query(currentDateTime, city.trim().toLowerCase())
             if (dbItem == null || isForcedRefresh) {
                 val networkItem = WeatherApi.weatherService.getCurrentWeather(city).await()
@@ -47,7 +47,7 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
 
     override suspend fun getDaysForecast(city: String, isForcedRefresh: Boolean) {
         withContext(Dispatchers.IO) {
-            val currentDateTime = SunshineDateUtils.getCurrentHour()
+            val currentDateTime = DateUtils.getCurrentHour()
             val forecastItems: List<ForecastItem>
             val forecastItemsDb =
                 database.forecastItemDao.queryFutureWeatherItems(currentDateTime, city)

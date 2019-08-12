@@ -1,6 +1,6 @@
-package com.example.myweather
+package com.example.myweather.untils
 
-import com.example.myweather.utils.SunshineDateUtils
+import com.example.myweather.utils.DateUtils
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -13,12 +13,15 @@ import java.util.concurrent.TimeUnit
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-class ExampleUnitTest {
+class DateUtilsTest {
     @Test
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
 
+    /**
+     * This test is to prove that SimpleDateFormat will convert the unix time to local time without any further manipulation
+     */
     @Test
     fun dateConversion2() {
         val dt = 1565362800L
@@ -37,19 +40,28 @@ class ExampleUnitTest {
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.HOUR, 0)
         calendar.set(Calendar.AM_PM, Calendar.PM)
-        val st = SunshineDateUtils.getNextDaysNoon(1)
+        val st = DateUtils.getNextDaysNoon(1)
         val elapsedHours = elapsedHoursSinceEpoch(st)
         val testHours = elapsedHoursSinceEpoch(calendar.timeInMillis)
         Assert.assertEquals(testHours, elapsedHours)
-
     }
+
+    @Test
+    fun testGetNextDay() {
+        val dayFormat = SimpleDateFormat("yyyy.MM.dd HH:mm:ss a")
+        val localTime1 = dayFormat.format(DateUtils.getNextDay(1))
+        val localTime2 = dayFormat.format(DateUtils.getNextDay(2))
+        val localTime3 = dayFormat.format(DateUtils.getNextDay(3))
+        val localTime4 = dayFormat.format(DateUtils.getNextDay(4))
+    }
+
 
     @Test
     fun getCurrentHour() {
         val calendar = Calendar.getInstance(TimeZone.getDefault())
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
-        val currentHour = SunshineDateUtils.getCurrentHour()
+        val currentHour = DateUtils.getCurrentHour()
         val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss a")
         val elapsedHours = elapsedHoursSinceEpoch(currentHour)
         val testHours = elapsedHoursSinceEpoch(calendar.timeInMillis)
@@ -60,7 +72,7 @@ class ExampleUnitTest {
     fun getDaysBetween() {
         val calendar = Calendar.getInstance(TimeZone.getDefault())
         calendar.add(Calendar.DATE, 1) // Add daysCount days to current date
-        Assert.assertEquals(1, SunshineDateUtils.getNumDaysBetweenNow(calendar.timeInMillis))
+        Assert.assertEquals(1, DateUtils.getNumDaysBetweenNow(calendar.timeInMillis))
     }
 
     /**

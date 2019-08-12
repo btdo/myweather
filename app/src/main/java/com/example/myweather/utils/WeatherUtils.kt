@@ -18,15 +18,17 @@ package com.example.myweather.utils
 import android.content.Context
 import android.util.Log
 import com.example.myweather.R
+import com.example.myweather.repository.ForecastItem
 
 /**
  * Contains useful utilities for a weather app, such as conversion between Celsius and Fahrenheit,
  * from kph to mph, and from degrees to NSEW.  It also contains the mapping of weather condition
  * codes in OpenWeatherMap to strings.  These strings are contained
+ * Partially copied from SunshineWeatherUtils of google codelab
  */
-object SunshineWeatherUtils {
+object WeatherUtils {
 
-    private val LOG_TAG = SunshineWeatherUtils::class.java.simpleName
+    private val LOG_TAG = WeatherUtils::class.java.simpleName
 
     /**
      * This method will convert a temperature from Celsius to Fahrenheit.
@@ -313,5 +315,19 @@ object SunshineWeatherUtils {
 
         Log.e(LOG_TAG, "Unknown Weather: $weatherId")
         return R.drawable.art_storm
+    }
+
+    fun groupItemsIntoDays(list: List<ForecastItem>): List<List<ForecastItem>> {
+        val dailyItemsList: MutableList<List<ForecastItem>> = arrayListOf()
+        for (numDaysInFuture in 1..5) {
+            // get all items that's within the numDays in future
+            val itemsWithinOneDay = list.filter { forecastItem ->
+                forecastItem.date >= DateUtils.getNextDay(numDaysInFuture) && forecastItem.date < DateUtils.getNextDay(
+                    numDaysInFuture + 1
+                )
+            }
+            dailyItemsList.add(itemsWithinOneDay)
+        }
+        return dailyItemsList
     }
 }

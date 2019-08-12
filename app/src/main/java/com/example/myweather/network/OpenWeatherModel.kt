@@ -3,7 +3,7 @@ package com.example.myweather.network
 import com.example.myweather.database.ForecastItemEntity
 import com.example.myweather.repository.ForecastItem
 import com.example.myweather.repository.HourForecast
-import com.example.myweather.utils.SunshineDateUtils
+import com.example.myweather.utils.DateUtils
 import com.squareup.moshi.Json
 
 data class TodayOpenWeather(
@@ -41,7 +41,7 @@ fun TodayOpenWeather.asDomainModel(): ForecastItem {
 fun TodayOpenWeather.asDatabaseModel(): ForecastItemEntity {
     return ForecastItemEntity(
         name.trim().toLowerCase(),
-        SunshineDateUtils.getCurrentHour(),
+        DateUtils.getCurrentHour(),
         weather[0].id,
         main.temp_min,
         main.temp_max,
@@ -131,7 +131,7 @@ fun DailyForecastOpenWeather.asDomainModel(): List<ForecastItem> {
         forecastDaysWeather.add(
             ForecastItem(
                 city.name,
-                SunshineDateUtils.normalizeDateTime(forecastDay.dt),
+                DateUtils.normalizeDateTime(forecastDay.dt),
                 forecastDay.weather.get(0).id,
                 forecastDay.main.temp_min,
                 forecastDay.main.temp_max,
@@ -155,7 +155,7 @@ fun DailyForecastOpenWeather.asDatabaseModel(): List<ForecastItemEntity> {
         forecastDaysWeather.add(
             ForecastItemEntity(
                 city.name,
-                SunshineDateUtils.normalizeDateTime(forecastDay.dt),
+                DateUtils.normalizeDateTime(forecastDay.dt),
                 forecastDay.weather.get(0).id,
                 forecastDay.main.temp_min,
                 forecastDay.main.temp_max,

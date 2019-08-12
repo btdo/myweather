@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Class for handling date conversions that are useful for converting date from backend to database and from database to model for display
  */
-object SunshineDateUtils {
+object DateUtils {
 
     fun normalizeDateTime(dt: Long): Long {
         return dt * 1000
@@ -50,6 +50,16 @@ object SunshineDateUtils {
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.HOUR, 0)
         calendar.set(Calendar.AM_PM, Calendar.PM)
+        return calendar.timeInMillis
+    }
+
+    fun getNextDay(daysCount: Int): Long {
+        val calendar = Calendar.getInstance(TimeZone.getDefault())
+        calendar.add(Calendar.DATE, daysCount) // Add daysCount days to current date
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.HOUR, 0)
+        calendar.set(Calendar.AM_PM, Calendar.AM)
         return calendar.timeInMillis
     }
 
