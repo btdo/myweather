@@ -20,10 +20,12 @@ data class ForecastItem(
 ) : Parcelable
 
 @Parcelize
-data class HourForecast(
-    val city: String,
+data class DailyForecastItem(
     val date: Long,
     val weatherId: Int,
     val temp: Double,
-    val windSpeed: Float
+    val minTemp: Double,
+    val maxTemp: Double,
+    val windSpeed: Float,
+    val hourlyItems: List<ForecastItem>
 ) : Parcelable

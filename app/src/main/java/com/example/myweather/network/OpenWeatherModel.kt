@@ -2,7 +2,6 @@ package com.example.myweather.network
 
 import com.example.myweather.database.ForecastItemEntity
 import com.example.myweather.repository.ForecastItem
-import com.example.myweather.repository.HourForecast
 import com.example.myweather.utils.DateUtils
 import com.squareup.moshi.Json
 
@@ -199,20 +198,3 @@ data class HourlyOpenWeather(
     val weather: List<Weather>,
     val wind: Wind
 )
-
-fun HourlyForecastOpenWeather.asDomainModel(): List<HourForecast> {
-    val hoursForecast = arrayListOf<HourForecast>()
-    list.map { forecastDay ->
-        hoursForecast.add(
-            HourForecast(
-                city.name,
-                forecastDay.dt,
-                forecastDay.weather.get(0).id,
-                forecastDay.main.temp,
-                forecastDay.wind.speed
-            )
-        )
-    }
-
-    return hoursForecast
-}

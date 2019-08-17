@@ -18,6 +18,7 @@ package com.example.myweather.utils
 import android.content.Context
 import android.util.Log
 import com.example.myweather.R
+import com.example.myweather.repository.DailyForecastItem
 import com.example.myweather.repository.ForecastItem
 
 /**
@@ -317,17 +318,38 @@ object WeatherUtils {
         return R.drawable.art_storm
     }
 
-    fun groupItemsIntoDays(list: List<ForecastItem>): List<List<ForecastItem>> {
-        val dailyItemsList: MutableList<List<ForecastItem>> = arrayListOf()
+    fun groupItemsIntoDays(list: List<ForecastItem>): Map<Long, List<ForecastItem>> {
+        val dailyItemsList: HashMap<Long, List<ForecastItem>> = HashMap()
         for (numDaysInFuture in 1..5) {
             // get all items that's within the numDays in future
             val itemsWithinOneDay = list.filter { forecastItem ->
+
                 forecastItem.date >= DateUtils.getNextDay(numDaysInFuture) && forecastItem.date < DateUtils.getNextDay(
                     numDaysInFuture + 1
                 )
             }
-            dailyItemsList.add(itemsWithinOneDay)
+            // save the date and all the ForecastItems within that date
+            dailyItemsList.put(DateUtils.getNextDay(numDaysInFuture), itemsWithinOneDay)
         }
+
+        return dailyItemsList
+    }
+
+    fun transformToDailyItems(dailyMap: Map<Long, List<ForecastItem>>): List<DailyForecastItem> {
+        val dailyItemsList: MutableList<DailyForecastItem> = arrayListOf()
+        // iterate over items of each day and find values for each day
+        for ((date, items) in dailyMap) {
+            val maxTemp = (items.maxBy { item -> item.temp })!!.temp
+            val minTemp = (items.minBy { item -> item.temp })!!.temp
+            val temp = items.map { item -> item.temp }.average()
+            // to get the weatherId and wind, just pick a mid day item and get the value from it
+            val midDayIndex = items.size / 2
+            val weatherId = items.get(midDayIndex).weatherId
+            val wind = items.get(midDayIndex).windSpeed
+            dailyItemsList.add(DailyForecastItem(date, weatherId, temp, minTemp, maxTemp, wind, items))
+        }
+
+        dailyItemsList.sortBy { item -> item.date }
         return dailyItemsList
     }
 }

@@ -20,7 +20,7 @@
         tools:layout="@layout/fragment_day_details">
         <argument
             android:name="forecastItem"
-            app:argType="com.example.myweather.repository.ForecastItem" />
+            app:argType="com.example.myweather.repository.DailyForecastItem" />
     </fragment>
     <fragment
         android:id="@+id/settings"

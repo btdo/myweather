@@ -48,18 +48,18 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         binding.hourlyForecast.layoutManager = LinearLayoutManager(context!!, LinearLayoutManager.HORIZONTAL, false)
 
 
-        viewModel.isMetric.observe(this, Observer { isMetric ->
+        viewModel.isMetric.observe(viewLifecycleOwner, Observer { isMetric ->
             adapter.mIsMetric = isMetric ?: true
         })
 
-        viewModel.showError.observe(this, Observer { showNetworkError ->
+        viewModel.showError.observe(viewLifecycleOwner, Observer { showNetworkError ->
             if (showNetworkError) {
                 Toast.makeText(activity, "Network Error", Toast.LENGTH_LONG).show()
                 viewModel.onNetworkErrorShown()
             }
         })
 
-        viewModel.viewSelectedDay.observe(this, Observer {
+        viewModel.viewSelectedDay.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 this.findNavController().navigate(HomeFragmentDirections.actionHomeToDayDetails(it))
                 viewModel.viewSelectedDayComplete()

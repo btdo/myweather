@@ -7,14 +7,14 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myweather.databinding.DailyForecastItemBinding
-import com.example.myweather.repository.ForecastItem
+import com.example.myweather.repository.DailyForecastItem
 
 class DailyForecastAdapter(
     private val mContext: Context,
     var mIsMetric: Boolean,
     private var clickListener: ForecastClickListener
 ) :
-    ListAdapter<ForecastItem, DailyForecastAdapter.DailyForecastViewHolder>(DiffCallback) {
+    ListAdapter<DailyForecastItem, DailyForecastAdapter.DailyForecastViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DailyForecastViewHolder {
         return DailyForecastViewHolder(mContext, DailyForecastItemBinding.inflate(LayoutInflater.from(parent.context)))
@@ -28,12 +28,12 @@ class DailyForecastAdapter(
         }
     }
 
-    companion object DiffCallback : DiffUtil.ItemCallback<ForecastItem>() {
-        override fun areItemsTheSame(oldItem: ForecastItem, newItem: ForecastItem): Boolean {
+    companion object DiffCallback : DiffUtil.ItemCallback<DailyForecastItem>() {
+        override fun areItemsTheSame(oldItem: DailyForecastItem, newItem: DailyForecastItem): Boolean {
             return oldItem.date == newItem.date
         }
 
-        override fun areContentsTheSame(oldItem: ForecastItem, newItem: ForecastItem): Boolean {
+        override fun areContentsTheSame(oldItem: DailyForecastItem, newItem: DailyForecastItem): Boolean {
             return oldItem == newItem
         }
     }
@@ -41,7 +41,7 @@ class DailyForecastAdapter(
     class DailyForecastViewHolder(private val mContext: Context, private var binding: DailyForecastItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(dayForecast: ForecastItem, isMetric: Boolean) {
+        fun bind(dayForecast: DailyForecastItem, isMetric: Boolean) {
             binding.dayForecast = dayForecast
             binding.isMetric = isMetric
             binding.executePendingBindings()
@@ -49,6 +49,6 @@ class DailyForecastAdapter(
     }
 }
 
-class ForecastClickListener(val clickListener: (day: ForecastItem) -> Unit) {
-    fun onClick(forecastItem: ForecastItem) = clickListener(forecastItem)
+class ForecastClickListener(val clickListener: (day: DailyForecastItem) -> Unit) {
+    fun onClick(forecastItem: DailyForecastItem) = clickListener(forecastItem)
 }

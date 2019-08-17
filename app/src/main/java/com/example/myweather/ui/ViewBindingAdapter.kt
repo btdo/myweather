@@ -5,6 +5,7 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myweather.R
+import com.example.myweather.repository.DailyForecastItem
 import com.example.myweather.repository.ForecastItem
 import com.example.myweather.utils.DateUtils
 import com.example.myweather.utils.WeatherUtils
@@ -34,7 +35,7 @@ fun bindDescription(view: TextView, weatherId: Int) {
 @BindingAdapter("dailyList")
 fun bindDailyForecastRecyclerView(
     recyclerView: RecyclerView,
-    data: List<ForecastItem>?
+    data: List<DailyForecastItem>?
 ) {
     val adapter = recyclerView.adapter as DailyForecastAdapter
     adapter.submitList(data)

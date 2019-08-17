@@ -2,11 +2,11 @@ package com.example.myweather.ui
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.example.myweather.repository.ForecastItem
+import com.example.myweather.repository.DailyForecastItem
 
-class DayDetailsViewModel(application: Application, forecastItem: ForecastItem) : AndroidViewModel(application) {
+class DayDetailsViewModel(application: Application, forecastItem: DailyForecastItem) : AndroidViewModel(application) {
 
-    private val _selectedDay = MutableLiveData<ForecastItem>()
+    private val _selectedDay = MutableLiveData<DailyForecastItem>()
     private val _isMetric = MutableLiveData<Boolean>()
 
     val isMetric: LiveData<Boolean>
@@ -36,14 +36,6 @@ class DayDetailsViewModel(application: Application, forecastItem: ForecastItem) 
         it.windSpeed
     }
 
-    val degrees: LiveData<Float> = Transformations.map(_selectedDay) {
-        it.degrees
-    }
-
-    val humidity: LiveData<Int> = Transformations.map(_selectedDay) {
-        it.humidity
-    }
-
     val minTemp: LiveData<Double> = Transformations.map(_selectedDay) {
         it.minTemp
     }
@@ -51,15 +43,9 @@ class DayDetailsViewModel(application: Application, forecastItem: ForecastItem) 
     val maxTemp: LiveData<Double> = Transformations.map(_selectedDay) {
         it.maxTemp
     }
-
-    val pressure: LiveData<Double> = Transformations.map(_selectedDay) {
-        it.pressure
-    }
-
-
 }
 
-class DayDetailsViewModelFactory(private val application: Application, private val forecastItem: ForecastItem) :
+class DayDetailsViewModelFactory(private val application: Application, private val forecastItem: DailyForecastItem) :
     ViewModelProvider.Factory {
 
     @Suppress("unchecked_cast")

@@ -3,6 +3,7 @@ package com.example.myweather.ui
 import android.app.Application
 import androidx.lifecycle.*
 import com.example.myweather.database.ForecastItemDatabase
+import com.example.myweather.repository.DailyForecastItem
 import com.example.myweather.repository.ForecastItem
 import com.example.myweather.repository.WeatherRepository
 import com.example.myweather.utils.WeatherUtils
@@ -24,9 +25,9 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     val showError: LiveData<Boolean>
         get() = _showError
 
-    private val _viewSelectedDay = MutableLiveData<ForecastItem>()
+    private val _viewSelectedDay = MutableLiveData<DailyForecastItem>()
 
-    val viewSelectedDay: LiveData<ForecastItem>
+    val viewSelectedDay: LiveData<DailyForecastItem>
         get() = _viewSelectedDay
 
     private val _location = MutableLiveData<String>()
@@ -65,13 +66,11 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         it.weatherId
     }
 
-    val dailyForecast: LiveData<List<ForecastItem>> = Transformations.map(repository.dailyForecast) {
+    val dailyForecast: LiveData<List<DailyForecastItem>> = Transformations.map(repository.dailyForecast) {
         val list = it.subList(8, it.lastIndex)
-
-        WeatherUtils.groupItemsIntoDays(list)
-
-
-        list
+        val dailyForecastMap = WeatherUtils.groupItemsIntoDays(list)
+        val dailyForecastItems = WeatherUtils.transformToDailyItems(dailyForecastMap)
+        dailyForecastItems
     }
 
     val hourlyForecast: LiveData<List<ForecastItem>> = Transformations.map(repository.dailyForecast) {
@@ -89,8 +88,8 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         onLocation(initLocation, false)
     }
 
-    fun viewSelectedDay(forecastItem: ForecastItem) {
-        _viewSelectedDay.value = forecastItem
+    fun viewSelectedDay(day: DailyForecastItem) {
+        _viewSelectedDay.value = day
     }
 
     fun viewSelectedDayComplete() {
