@@ -13,6 +13,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 class HomeFragmentViewModel(application: Application, initLocation: String) : AndroidViewModel(application) {
+    companion object {
+        // backend returns in 3 hour internal, so 8x3= 24 for the upcoming day
+        const val NUM_ITEMS_PER_DAY = 8
+    }
     /**
      * Event triggered for network error. This is private to avoid exposing a
      * way to set this value to observers.
@@ -66,15 +70,18 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         it.weatherId
     }
 
-    val dailyForecast: LiveData<List<DailyForecastItem>> = Transformations.map(repository.dailyForecast) {
-        val list = it.subList(8, it.lastIndex)
+    val dailyForecast: LiveData<List<DailyForecastItem>> = Transformations.map(repository.forecast) {
+        // get a list of items that are more than 24 hours away from today
+        val list = it.subList(NUM_ITEMS_PER_DAY, it.lastIndex)
+        // group items within their days
         val dailyForecastMap = WeatherUtils.groupItemsIntoDays(list)
+        // calculate average temperature, min and max for each day
         val dailyForecastItems = WeatherUtils.transformToDailyItems(dailyForecastMap)
         dailyForecastItems
     }
 
-    val hourlyForecast: LiveData<List<ForecastItem>> = Transformations.map(repository.dailyForecast) {
-        it.subList(0, 8)
+    val hourlyForecast: LiveData<List<ForecastItem>> = Transformations.map(repository.forecast) {
+        it.subList(0, NUM_ITEMS_PER_DAY)
     }
 
     private val _isMetric = MutableLiveData<Boolean>().apply { this.value = true }
@@ -83,6 +90,30 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         get() {
             return _isMetric
         }
+
+    val windSpeed: LiveData<Float> = Transformations.map(repository.todayForecast) {
+        it.windSpeed
+    }
+
+    val degrees: LiveData<Float> = Transformations.map(repository.todayForecast) {
+        it.degrees
+    }
+
+    val minTemp: LiveData<Double> = Transformations.map(repository.todayForecast) {
+        it.minTemp
+    }
+
+    val maxTemp: LiveData<Double> = Transformations.map(repository.todayForecast) {
+        it.maxTemp
+    }
+
+    val pressure: LiveData<Double> = Transformations.map(repository.todayForecast) {
+        it.pressure
+    }
+
+    val humidity: LiveData<Int> = Transformations.map(repository.todayForecast) {
+        it.humidity
+    }
 
     init {
         onLocation(initLocation, false)
@@ -115,7 +146,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     private fun getDailyForecast(city: String, isForcedRefresh: Boolean) {
         viewModelScope.launch {
             try {
-                repository.getDaysForecast(city, isForcedRefresh)
+                repository.getForecast(city, isForcedRefresh)
                 _showError.value = false
             } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.

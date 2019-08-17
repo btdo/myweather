@@ -18,17 +18,17 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
 
     val todayForecast: LiveData<ForecastItem>
         get() {
-            return _todayForecast
+            return _currentForecast
         }
 
-    private val _todayForecast = MutableLiveData<ForecastItem>()
+    private val _currentForecast = MutableLiveData<ForecastItem>()
 
-    val dailyForecast: LiveData<List<ForecastItem>>
+    val forecast: LiveData<List<ForecastItem>>
         get() {
-            return _dailyForecast
+            return _forecast
         }
 
-    private val _dailyForecast = MutableLiveData<List<ForecastItem>>()
+    private val _forecast = MutableLiveData<List<ForecastItem>>()
 
 
     override suspend fun getCurrentForecast(city: String, isForcedRefresh: Boolean) {
@@ -41,11 +41,14 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
                 database.forecastItemDao.insert(dbItem)
             }
 
-            _todayForecast.postValue(dbItem.asDomainModel())
+            _currentForecast.postValue(dbItem.asDomainModel())
         }
     }
 
-    override suspend fun getDaysForecast(city: String, isForcedRefresh: Boolean) {
+    /**
+     * backend return forecast for the next 5 days with a 3 hour interval
+     */
+    override suspend fun getForecast(city: String, isForcedRefresh: Boolean) {
         withContext(Dispatchers.IO) {
             val currentDateTime = DateUtils.getCurrentHour()
             val forecastItems: List<ForecastItem>
@@ -62,7 +65,7 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
                 }
             }
 
-            _dailyForecast.postValue(forecastItems)
+            _forecast.postValue(forecastItems)
         }
 
     }

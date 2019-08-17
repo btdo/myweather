@@ -4,5 +4,5 @@ interface WeatherRepositoryInterface {
 
     suspend fun getCurrentForecast(city: String, isForcedRefresh: Boolean)
 
-    suspend fun getDaysForecast(city: String, isForcedRefresh: Boolean)
+    suspend fun getForecast(city: String, isForcedRefresh: Boolean)
 }

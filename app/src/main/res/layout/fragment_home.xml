@@ -51,6 +51,84 @@
                 android:text="@{viewModel.description}"
                 tools:text="Cloudy" />
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/wind"
+                style="@style/detailsLabel"
+                android:layout_marginTop="@dimen/margin_medium"
+                android:text="@string/wind_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/wind_value"
+                style="@style/detailsValue"
+                android:layout_marginTop="@dimen/margin_normal"
+                app:degrees="@{viewModel.degrees}"
+                app:isMetric="@{viewModel.isMetric}"
+                app:layout_constraintStart_toStartOf="@id/wind"
+                app:layout_constraintTop_toBottomOf="@id/wind"
+                app:windSpeed="@{viewModel.windSpeed}"
+                tools:text="18 km/h" />
+
+            <TextView
+                android:id="@+id/humidity"
+                style="@style/detailsLabel"
+                android:layout_marginTop="@dimen/margin_medium"
+                android:text="@string/humidity_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/wind_value" />
+
+            <TextView
+                android:id="@+id/humidity_value"
+                style="@style/detailsValue"
+                android:layout_marginTop="@dimen/margin_normal"
+                app:humidity="@{viewModel.humidity}"
+                app:layout_constraintStart_toStartOf="@id/humidity"
+                app:layout_constraintTop_toBottomOf="@id/humidity"
+                tools:text="42%" />
+
+            <TextView
+                android:id="@+id/highLowTemp"
+                style="@style/detailsLabel"
+                android:layout_marginTop="@dimen/margin_medium"
+                android:text="@string/high_low_label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/highLowTemp_value"
+                style="@style/detailsValue"
+                android:layout_marginTop="@dimen/margin_normal"
+                app:high="@{viewModel.maxTemp}"
+                app:isMetric="@{viewModel.isMetric}"
+                app:layout_constraintEnd_toEndOf="@id/highLowTemp"
+                app:layout_constraintTop_toBottomOf="@id/highLowTemp"
+                app:low="@{viewModel.minTemp}"
+                tools:text="32 / 12" />
+
+            <TextView
+                android:id="@+id/pressure"
+                style="@style/detailsLabel"
+                android:layout_marginTop="@dimen/margin_medium"
+                android:text="@string/pressure_label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/highLowTemp_value" />
+
+            <TextView
+                android:id="@+id/pressure_value"
+                style="@style/detailsValue"
+                android:layout_marginTop="@dimen/margin_normal"
+                app:layout_constraintEnd_toEndOf="@id/pressure"
+                app:layout_constraintTop_toBottomOf="@id/pressure"
+                app:pressure="@{viewModel.pressure}"
+                tools:text="102 hPa" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
@@ -82,6 +160,7 @@
             app:dailyList="@{viewModel.dailyForecast}"
             tools:itemCount="5"
             tools:listitem="@layout/daily_forecast_item" />
+
 
     </LinearLayout>
 

@@ -335,6 +335,11 @@ object WeatherUtils {
         return dailyItemsList
     }
 
+    /**
+     * Calculate temperature, min and max for each day
+     * @param dailyMap a map of days and their forecast items within that day
+     * @return a list of DailyForecastItem where each item represents a day in future
+     */
     fun transformToDailyItems(dailyMap: Map<Long, List<ForecastItem>>): List<DailyForecastItem> {
         val dailyItemsList: MutableList<DailyForecastItem> = arrayListOf()
         // iterate over items of each day and find values for each day

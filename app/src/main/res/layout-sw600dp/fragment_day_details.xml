@@ -41,6 +41,36 @@
             app:temperature="@{viewModel.temperature}"
             tools:text="18" />
 
+        <ImageView
+            android:id="@+id/weather_icon"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/margin_normal"
+            android:adjustViewBounds="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/temperature"
+            app:weatherId="@{viewModel.weatherId}"
+            tools:src="@drawable/art_clouds" />
+
+        <TextView
+            android:id="@+id/description"
+            style="@style/detailsLabel"
+            android:layout_marginTop="@dimen/margin_medium"
+            android:text="@string/description_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/weather_icon" />
+
+        <TextView
+            android:id="@+id/description_value"
+            style="@style/detailsValue"
+            android:layout_marginTop="@dimen/margin_normal"
+            app:layout_constraintStart_toStartOf="@id/description"
+            app:layout_constraintTop_toBottomOf="@id/description"
+            app:weatherId="@{viewModel.weatherId}"
+            tools:text="Cloudy" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
