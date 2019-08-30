@@ -74,31 +74,8 @@ interface WeatherApiService {
     ): Deferred<HourlyForecastOpenWeather>
 }
 
-interface WeatherApiServiceProd {
-
-    @GET("weather")
-    fun getCurrentWeather(
-        @Query(QUERY_PARAM) location: String, @Query(APPID_PARAM) appid: String = DEFAULT_APPID, @Query(UNITS_PARAM) units: String = DEFAULT_UNITS
-    ): Deferred<TodayOpenWeather>
-
-    @GET("forecast")
-    fun getDailyForecast(
-        @Query(QUERY_PARAM) location: String, @Query(APPID_PARAM) appid: String = DEFAULT_APPID, @Query(DAYS_PARAM) cnt: Int = DEFAULT_NUMDAYS, @Query(
-            UNITS_PARAM
-        ) units: String = DEFAULT_UNITS
-    ): Deferred<DailyForecastOpenWeather>
-
-    @GET("forecast/hourly")
-    fun getHourlyForecast(
-        @Query(QUERY_PARAM) location: String, @Query(APPID_PARAM) appid: String = DEFAULT_APPID, @Query(UNITS_PARAM) units: String = DEFAULT_UNITS
-    ): Deferred<HourlyForecastOpenWeather>
-}
-
 object WeatherApi {
     val weatherService: WeatherApiService by lazy {
         retrofit.create(WeatherApiService::class.java)
-    }
-    val weatherServiceProd: WeatherApiServiceProd by lazy {
-        retrofit.create(WeatherApiServiceProd::class.java)
     }
 }

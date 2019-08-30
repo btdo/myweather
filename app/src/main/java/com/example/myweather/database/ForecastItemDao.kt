@@ -16,11 +16,17 @@ interface ForecastItemDao {
     @Query("SELECT * from forecast_item_table WHERE date = :date and city = :city")
     fun query(date: Long, city: String): ForecastItemEntity?
 
-    @Query("Delete from forecast_item_table")
-    fun clear()
+    @Query("Delete from forecast_item_table WHERE date < :date and city = :city")
+    fun clearPastItems(city: String, date: Long)
+
+    @Query("Delete from forecast_item_table WHERE date > :date and city = :city")
+    fun clearFutureItems(city: String, date: Long)
 
     @Query("Delete from forecast_item_table WHERE city = :city")
     fun clear(city: String)
+
+    @Query("Delete from forecast_item_table")
+    fun clearAll()
 
     @Query("SELECT * from forecast_item_table where date >= :date and city = :city ORDER BY date ASC")
     fun queryFutureWeatherItems(date: Long, city: String): List<ForecastItemEntity>

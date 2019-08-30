@@ -329,7 +329,9 @@ object WeatherUtils {
                 )
             }
             // save the date and all the ForecastItems within that date
-            dailyItemsList.put(DateUtils.getNextDay(numDaysInFuture), itemsWithinOneDay)
+            if (itemsWithinOneDay.size > 0) {
+                dailyItemsList.put(DateUtils.getNextDay(numDaysInFuture), itemsWithinOneDay)
+            }
         }
 
         return dailyItemsList
@@ -344,8 +346,8 @@ object WeatherUtils {
         val dailyItemsList: MutableList<DailyForecastItem> = arrayListOf()
         // iterate over items of each day and find values for each day
         for ((date, items) in dailyMap) {
-            val maxTemp = (items.maxBy { item -> item.temp })!!.temp
-            val minTemp = (items.minBy { item -> item.temp })!!.temp
+            val maxTemp = (items.maxBy { item -> item.temp })?.temp ?: Double.MAX_VALUE
+            val minTemp = (items.minBy { item -> item.temp })?.temp ?: Double.MIN_VALUE
             val temp = items.map { item -> item.temp }.average()
             // to get the weatherId and wind, just pick a mid day item and get the value from it
             val midDayIndex = items.size / 2

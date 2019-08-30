@@ -74,7 +74,7 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, pref: String) {
         if (pref == resources.getString(R.string.pref_location_key)) {
-            viewModel.onLocation(
+            viewModel.onLocationWeather(
                 sharedPreferences.getString(
                     pref,
                     resources.getString(R.string.pref_location_default)

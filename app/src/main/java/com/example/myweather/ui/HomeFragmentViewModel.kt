@@ -2,21 +2,47 @@ package com.example.myweather.ui
 
 import android.app.Application
 import androidx.lifecycle.*
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.myweather.database.ForecastItemDatabase
 import com.example.myweather.repository.DailyForecastItem
 import com.example.myweather.repository.ForecastItem
 import com.example.myweather.repository.WeatherRepository
 import com.example.myweather.utils.WeatherUtils
+import com.example.myweather.worker.KEY_CITY_SYNC
+import com.example.myweather.worker.WeatherSyncWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class HomeFragmentViewModel(application: Application, initLocation: String) : AndroidViewModel(application) {
     companion object {
         // backend returns in 3 hour internal, so 8x3= 24 for the upcoming day
         const val NUM_ITEMS_PER_DAY = 8
     }
+
+    /**
+     * This is the job for all coroutines started by this ViewModel.
+     *
+     * Cancelling this job will cancel all coroutines started by this ViewModel.
+     */
+    private val viewModelJob = SupervisorJob()
+
+    private val workManager = WorkManager.getInstance(application)
+
+    /**
+     * This is the main scope for all coroutines launched by MainViewModel.
+     *
+     * Since we pass viewModelJob, you can cancel all coroutines launched by uiScope by calling
+     * viewModelJob.cancel()
+     */
+    private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
+
+    private val repository = WeatherRepository(ForecastItemDatabase.getInstance(application))
+
     /**
      * Event triggered for network error. This is private to avoid exposing a
      * way to set this value to observers.
@@ -34,29 +60,13 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     val viewSelectedDay: LiveData<DailyForecastItem>
         get() = _viewSelectedDay
 
-    private val _location = MutableLiveData<String>()
+    private val _location = MutableLiveData<String>().apply {
+        this.value = initLocation
+    }
     val location: LiveData<String>
         get() {
             return _location
         }
-
-
-    /**
-     * This is the job for all coroutines started by this ViewModel.
-     *
-     * Cancelling this job will cancel all coroutines started by this ViewModel.
-     */
-    private val viewModelJob = SupervisorJob()
-
-    /**
-     * This is the main scope for all coroutines launched by MainViewModel.
-     *
-     * Since we pass viewModelJob, you can cancel all coroutines launched by uiScope by calling
-     * viewModelJob.cancel()
-     */
-    private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
-
-    private val repository = WeatherRepository(ForecastItemDatabase.getInstance(application))
 
     val description: LiveData<String> = Transformations.map(repository.todayForecast) {
         it.mainDescription
@@ -116,7 +126,29 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     }
 
     init {
-        onLocation(initLocation, false)
+        clearCache()
+        setupBackgroundTask(initLocation)
+        onLocationWeather(initLocation, false)
+    }
+
+    fun onLocationWeather(city: String, isForcedRefresh: Boolean) {
+        _location.value = city
+        getTodayWeather(city, isForcedRefresh)
+        getDailyForecast(city, isForcedRefresh)
+    }
+
+    fun refresh() {
+        _location.value?.let {
+            onLocationWeather(it, false)
+        }
+    }
+
+    fun setupBackgroundTask(city: String) {
+        val data = workDataOf(
+            KEY_CITY_SYNC to city
+        )
+        val workRequest = OneTimeWorkRequestBuilder<WeatherSyncWorker>().setInputData(data).build()
+        workManager.enqueue(workRequest)
     }
 
     fun viewSelectedDay(day: DailyForecastItem) {
@@ -129,6 +161,16 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
 
     fun onUnitChanged(isMetric: Boolean) {
         _isMetric.value = isMetric
+    }
+
+    private fun clearCache() {
+        viewModelScope.launch {
+            try {
+                repository.clearCache()
+            } catch (e: Exception) {
+                Timber.e(e)
+            }
+        }
     }
 
     private fun getTodayWeather(city: String, isForcedRefresh: Boolean) {
@@ -146,7 +188,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     private fun getDailyForecast(city: String, isForcedRefresh: Boolean) {
         viewModelScope.launch {
             try {
-                repository.getForecast(city, isForcedRefresh)
+                repository.getComingDaysForecast(city, isForcedRefresh)
                 _showError.value = false
             } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.
@@ -155,17 +197,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         }
     }
 
-    fun onLocation(city: String, isForcedRefresh: Boolean) {
-        _location.value = city
-        getTodayWeather(city, isForcedRefresh)
-        getDailyForecast(city, isForcedRefresh)
-    }
 
-    fun refresh() {
-        _location.value?.let {
-            onLocation(it, true)
-        }
-    }
 
     /**
      * Resets the network error flag.
