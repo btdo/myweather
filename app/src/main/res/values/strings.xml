@@ -34,6 +34,11 @@
       - Used by SunshinePreferences  -
       - - - - - - - - - - - - - - - -->
 
+    <!-- Label for Hourly Syncing -->
+    <string name="pref_hourly_sync_label">Enable hourly syncing</string>
+
+    <string name="pref_hourly_sync_key">hourly_sync</string>
+
     <!-- Label for the location preference -->
     <string name="pref_location_label">Location</string>
 

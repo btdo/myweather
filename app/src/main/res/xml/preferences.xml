@@ -16,8 +16,8 @@
         app:title="App Preferences">
 
         <SwitchPreferenceCompat
-            app:key="enable_sync"
-            app:title="Enable daily syncing" />
+            app:key="@string/pref_hourly_sync_key"
+            app:title="@string/pref_hourly_sync_label" />
 
         <EditTextPreference
             app:key="@string/pref_location_key"

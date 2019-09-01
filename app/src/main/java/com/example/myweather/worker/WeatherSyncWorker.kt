@@ -10,7 +10,12 @@ import timber.log.Timber
 
 const val KEY_CITY_SYNC = "KEY_CITY_SYNC"
 
+
 class WeatherSyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
+
+    companion object {
+        const val MY_WEATHER_SYNC_BACKGROUND_WORK_NAME = "MY_WEATHER_SYNC_BACKGROUND_WORK_NAME"
+    }
 
     override suspend fun doWork(): Result {
         try {

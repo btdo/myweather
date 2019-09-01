@@ -69,12 +69,17 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         PreferenceManager.getDefaultSharedPreferences(activity)
             .registerOnSharedPreferenceChangeListener(this)
         setHasOptionsMenu(true)
+
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+        val hourlySync = sharedPreferences.getBoolean(resources.getString(R.string.pref_hourly_sync_key), false)
+        if (hourlySync) viewModel.setupHourlySync()
+
         return binding.root
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, pref: String) {
         if (pref == resources.getString(R.string.pref_location_key)) {
-            viewModel.onLocationWeather(
+            viewModel.onLocationChange(
                 sharedPreferences.getString(
                     pref,
                     resources.getString(R.string.pref_location_default)
@@ -83,6 +88,9 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         } else if (pref == resources.getString(R.string.pref_units_key)) {
             val isMetric = sharedPreferences.getString(pref, "") == resources.getString(R.string.pref_units_metric)
             viewModel.onUnitChanged(isMetric)
+        } else if (pref == resources.getString(R.string.pref_hourly_sync_key)) {
+            if (sharedPreferences.getBoolean(pref, false)) viewModel.setupHourlySync() else viewModel.cancelHourlySync()
+
         }
     }
 

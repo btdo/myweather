@@ -2,9 +2,7 @@ package com.example.myweather.ui
 
 import android.app.Application
 import androidx.lifecycle.*
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.workDataOf
+import androidx.work.*
 import com.example.myweather.database.ForecastItemDatabase
 import com.example.myweather.repository.DailyForecastItem
 import com.example.myweather.repository.ForecastItem
@@ -12,11 +10,13 @@ import com.example.myweather.repository.WeatherRepository
 import com.example.myweather.utils.WeatherUtils
 import com.example.myweather.worker.KEY_CITY_SYNC
 import com.example.myweather.worker.WeatherSyncWorker
+import com.example.myweather.worker.WeatherSyncWorker.Companion.MY_WEATHER_SYNC_BACKGROUND_WORK_NAME
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class HomeFragmentViewModel(application: Application, initLocation: String) : AndroidViewModel(application) {
     companion object {
@@ -126,12 +126,10 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     }
 
     init {
-        clearCache()
-        setupBackgroundTask(initLocation)
-        onLocationWeather(initLocation, false)
+        onLocationChange(initLocation, false)
     }
 
-    fun onLocationWeather(city: String, isForcedRefresh: Boolean) {
+    fun onLocationChange(city: String, isForcedRefresh: Boolean) {
         _location.value = city
         getTodayWeather(city, isForcedRefresh)
         getDailyForecast(city, isForcedRefresh)
@@ -139,16 +137,31 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
 
     fun refresh() {
         _location.value?.let {
-            onLocationWeather(it, false)
+            onLocationChange(it, true)
         }
     }
 
-    fun setupBackgroundTask(city: String) {
+    fun cancelHourlySync() {
+        workManager.cancelUniqueWork(MY_WEATHER_SYNC_BACKGROUND_WORK_NAME)
+    }
+
+    fun setupHourlySync() {
         val data = workDataOf(
-            KEY_CITY_SYNC to city
+            KEY_CITY_SYNC to _location.value
         )
-        val workRequest = OneTimeWorkRequestBuilder<WeatherSyncWorker>().setInputData(data).build()
-        workManager.enqueue(workRequest)
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.UNMETERED)
+            .build()
+
+        val workRequest =
+            PeriodicWorkRequestBuilder<WeatherSyncWorker>(15, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .setInputData(data).build()
+        workManager.enqueueUniquePeriodicWork(
+            MY_WEATHER_SYNC_BACKGROUND_WORK_NAME,
+            ExistingPeriodicWorkPolicy.REPLACE,
+            workRequest
+        )
     }
 
     fun viewSelectedDay(day: DailyForecastItem) {
@@ -196,8 +209,6 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
             }
         }
     }
-
-
 
     /**
      * Resets the network error flag.
