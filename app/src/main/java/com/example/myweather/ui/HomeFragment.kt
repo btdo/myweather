@@ -16,6 +16,7 @@ import com.example.myweather.R
 import com.example.myweather.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener {
+    private lateinit var binding: FragmentHomeBinding
     private val viewModel: HomeFragmentViewModel by lazy {
         val activity = requireNotNull(this.activity) {
             "You can only access the viewModel after onActivityCreated()"
@@ -33,7 +34,7 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val binding = FragmentHomeBinding.inflate(inflater)
+        binding = FragmentHomeBinding.inflate(inflater)
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
 
@@ -74,6 +75,10 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         val hourlySync = sharedPreferences.getBoolean(resources.getString(R.string.pref_hourly_sync_key), false)
         if (hourlySync) viewModel.setupHourlySync()
 
+        binding.swiperefresh.setOnRefreshListener {
+            refresh()
+        }
+
         return binding.root
     }
 
@@ -100,6 +105,12 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
             .unregisterOnSharedPreferenceChangeListener(this)
     }
 
+    private fun refresh() {
+        binding.swiperefresh.isRefreshing = true
+        viewModel.refresh()
+        binding.swiperefresh.isRefreshing = false
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu, menu)
@@ -107,7 +118,7 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.refresh) {
-            viewModel.refresh()
+            refresh()
             return true
         }
 
