@@ -42,11 +42,12 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
             viewModel.viewSelectedDay(day)
         })
 
-        binding.dailyForecast.adapter = adapter
+        binding.content.dailyForecast.adapter = adapter
 
         val hourlyAdapter = HourlyForecastAdapter(context!!, viewModel.isMetric.value ?: true)
-        binding.hourlyForecast.adapter = hourlyAdapter
-        binding.hourlyForecast.layoutManager = LinearLayoutManager(context!!, LinearLayoutManager.HORIZONTAL, false)
+        binding.content.hourlyForecast.adapter = hourlyAdapter
+        binding.content.hourlyForecast.layoutManager =
+            LinearLayoutManager(context!!, LinearLayoutManager.HORIZONTAL, false)
 
 
         viewModel.isMetric.observe(viewLifecycleOwner, Observer { isMetric ->
@@ -75,7 +76,7 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         val hourlySync = sharedPreferences.getBoolean(resources.getString(R.string.pref_hourly_sync_key), false)
         if (hourlySync) viewModel.setupHourlySync()
 
-        binding.swiperefresh.setOnRefreshListener {
+        binding.swipeRefresh.setOnRefreshListener {
             refresh()
         }
 
@@ -106,9 +107,9 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
     }
 
     private fun refresh() {
-        binding.swiperefresh.isRefreshing = true
+        binding.swipeRefresh.isRefreshing = true
         viewModel.refresh()
-        binding.swiperefresh.isRefreshing = false
+        binding.swipeRefresh.isRefreshing = false
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:bind="http://schemas.android.com/tools">
 
     <data>
 
@@ -12,164 +11,20 @@
     </data>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swiperefresh"
+        android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/layout"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="top|center"
-            android:orientation="vertical"
-            android:padding="@dimen/margin_xlarge"
-            tools:context=".ui.HomeFragment">
+            android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/city_name"
-                style="@style/pageTitle"
-                android:text="@{viewModel.location}"
-                tools:text="Mountain View" />
-
-            <ImageView
-                android:id="@+id/weather_icon"
-                android:layout_width="96dp"
-                android:layout_height="96dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/margin_normal"
-                android:adjustViewBounds="true"
-                app:weatherId="@{viewModel.weatherId}"
-                tools:src="@drawable/art_clouds" />
-
-            <TextView
-                android:id="@+id/temperature"
-                style="@style/pageSubTitle"
-                android:layout_marginTop="@dimen/margin_normal"
-                app:isMetric="@{viewModel.isMetric}"
-                app:temperature="@{viewModel.temperature}"
-                tools:text="18" />
-
-            <TextView
-                android:id="@+id/description"
-                style="@style/pageSubTitle"
-                android:layout_marginTop="@dimen/margin_normal"
-                android:text="@{viewModel.description}"
-                tools:text="Cloudy" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/wind"
-                    style="@style/detailsLabel"
-                    android:layout_marginTop="@dimen/margin_medium"
-                    android:text="@string/wind_label"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/wind_value"
-                    style="@style/detailsValue"
-                    android:layout_marginTop="@dimen/margin_normal"
-                    app:degrees="@{viewModel.degrees}"
-                    app:isMetric="@{viewModel.isMetric}"
-                    app:layout_constraintStart_toStartOf="@id/wind"
-                    app:layout_constraintTop_toBottomOf="@id/wind"
-                    app:windSpeed="@{viewModel.windSpeed}"
-                    tools:text="18 km/h" />
-
-                <TextView
-                    android:id="@+id/humidity"
-                    style="@style/detailsLabel"
-                    android:layout_marginTop="@dimen/margin_medium"
-                    android:text="@string/humidity_label"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/wind_value" />
-
-                <TextView
-                    android:id="@+id/humidity_value"
-                    style="@style/detailsValue"
-                    android:layout_marginTop="@dimen/margin_normal"
-                    app:humidity="@{viewModel.humidity}"
-                    app:layout_constraintStart_toStartOf="@id/humidity"
-                    app:layout_constraintTop_toBottomOf="@id/humidity"
-                    tools:text="42%" />
-
-                <TextView
-                    android:id="@+id/highLowTemp"
-                    style="@style/detailsLabel"
-                    android:layout_marginTop="@dimen/margin_medium"
-                    android:text="@string/high_low_label"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/highLowTemp_value"
-                    style="@style/detailsValue"
-                    android:layout_marginTop="@dimen/margin_normal"
-                    app:high="@{viewModel.maxTemp}"
-                    app:isMetric="@{viewModel.isMetric}"
-                    app:layout_constraintEnd_toEndOf="@id/highLowTemp"
-                    app:layout_constraintTop_toBottomOf="@id/highLowTemp"
-                    app:low="@{viewModel.minTemp}"
-                    tools:text="32 / 12" />
-
-                <TextView
-                    android:id="@+id/pressure"
-                    style="@style/detailsLabel"
-                    android:layout_marginTop="@dimen/margin_medium"
-                    android:text="@string/pressure_label"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/highLowTemp_value" />
-
-                <TextView
-                    android:id="@+id/pressure_value"
-                    style="@style/detailsValue"
-                    android:layout_marginTop="@dimen/margin_normal"
-                    app:layout_constraintEnd_toEndOf="@id/pressure"
-                    app:layout_constraintTop_toBottomOf="@id/pressure"
-                    app:pressure="@{viewModel.pressure}"
-                    tools:text="102 hPa" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:layout_marginTop="@dimen/margin_large"
-                android:background="@color/divider" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/hourlyForecast"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_medium"
-                app:hourlyList="@{viewModel.hourlyForecast}"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="5"
-                tools:listitem="@layout/hourly_forecast_item" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:layout_marginTop="@dimen/margin_medium"
-                android:background="@color/divider" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/dailyForecast"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_xlarge"
-                app:dailyList="@{viewModel.dailyForecast}"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="5"
-                tools:listitem="@layout/daily_forecast_item" />
-
-
-        </LinearLayout>
+            <include
+                android:id="@+id/content"
+                layout="@layout/fragment_home_content"
+                bind:viewModel="@{viewModel}" />
+        </ScrollView>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
 
 </layout>
