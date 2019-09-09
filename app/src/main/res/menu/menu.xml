@@ -11,4 +11,11 @@
         android:id="@+id/refresh"
         android:title="@string/action_refresh"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_search"
+        android:title="@string/action_search"
+        app:actionViewClass="android.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
 </menu>

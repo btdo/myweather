@@ -1,8 +1,11 @@
 package com.example.myweather.ui
 
+import android.app.SearchManager
+import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -29,6 +32,8 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         ViewModelProviders.of(this, HomeFragmentViewModel.Factory(activity.application, location!!))
             .get(HomeFragmentViewModel::class.java)
     }
+    private lateinit var searchView: SearchView
+    private lateinit var menuItem: MenuItem
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -113,8 +118,40 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu, menu)
+        val searchManager = activity?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        menuItem = menu.findItem(R.id.search)
+        searchView = (menuItem.actionView as SearchView).apply {
+            // Assumes current activity is the searchable activity
+            setSearchableInfo(searchManager.getSearchableInfo(activity?.componentName))
+            isIconifiedByDefault = true
+        }
+
+        searchView.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(value: String?): Boolean {
+                    value?.let {
+                        viewModel.onLocationChange(it, false)
+                    }
+
+                    return true
+                }
+
+                override fun onQueryTextChange(value: String?): Boolean {
+                    return true
+                }
+            }
+        )
+
+        menuItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(p0: MenuItem?): Boolean {
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean {
+                return true
+            }
+        })
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
