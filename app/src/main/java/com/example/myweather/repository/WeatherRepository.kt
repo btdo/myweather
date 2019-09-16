@@ -36,8 +36,8 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
         }
     }
 
-    override suspend fun getCurrentForecast(city: String, isForcedRefresh: Boolean) {
-        withContext(Dispatchers.IO) {
+    override suspend fun getCurrentForecast(city: String, isForcedRefresh: Boolean): ForecastItem {
+        return withContext(Dispatchers.IO) {
             val currentHour = DateUtils.getCurrentHour()
             var dbItem = database.forecastItemDao.query(currentHour, city.trim().toLowerCase())
             if (dbItem == null || isForcedRefresh) {
@@ -46,15 +46,18 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
                 database.forecastItemDao.insert(dbItem)
                 database.forecastItemDao.clearPastItems(city, currentHour)
             }
-            _currentForecast.postValue(dbItem.asDomainModel())
+
+            val domainModel = dbItem.asDomainModel()
+            _currentForecast.postValue(domainModel)
+            return@withContext domainModel
         }
     }
 
     /**
      * backend return forecast for the next 5 days with a 3 hour interval
      */
-    override suspend fun getComingDaysForecast(city: String, isForcedRefresh: Boolean) {
-        withContext(Dispatchers.IO) {
+    override suspend fun getComingDaysForecast(city: String, isForcedRefresh: Boolean): List<ForecastItem> {
+        return withContext(Dispatchers.IO) {
             val currentHour = DateUtils.getCurrentHour()
             val forecastItems: List<ForecastItem>
             val forecastItemsDb =
@@ -72,6 +75,7 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
             }
 
             _forecast.postValue(forecastItems)
+            return@withContext forecastItems
         }
     }
 

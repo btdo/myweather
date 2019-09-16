@@ -15,7 +15,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 class HomeFragmentViewModel(application: Application, initLocation: String) : AndroidViewModel(application) {
@@ -174,16 +173,6 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
 
     fun onUnitChanged(isMetric: Boolean) {
         _isMetric.value = isMetric
-    }
-
-    private fun clearCache() {
-        viewModelScope.launch {
-            try {
-                repository.clearCache()
-            } catch (e: Exception) {
-                Timber.e(e)
-            }
-        }
     }
 
     private fun getTodayWeather(city: String, isForcedRefresh: Boolean) {

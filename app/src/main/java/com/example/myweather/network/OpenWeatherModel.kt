@@ -30,7 +30,7 @@ fun TodayOpenWeather.asDomainModel(): ForecastItem {
         main.humidity,
         main.pressure,
         wind.speed,
-        wind.deg,
+        wind.deg ?: 0f,
         main.temp,
         weather.get(0).main,
         weather.get(0).description
@@ -47,7 +47,7 @@ fun TodayOpenWeather.asDatabaseModel(): ForecastItemEntity {
         main.humidity,
         main.pressure,
         wind.speed,
-        wind.deg,
+        wind.deg ?: 0f,
         main.temp,
         weather.get(0).main,
         weather.get(0).description
@@ -75,7 +75,7 @@ data class Day(
 )
 
 data class Wind(
-    val deg: Float,
+    val deg: Float?,
     val speed: Float
 )
 
@@ -137,7 +137,7 @@ fun DailyForecastOpenWeather.asDomainModel(): List<ForecastItem> {
                 forecastDay.main.humidity,
                 forecastDay.main.pressure,
                 forecastDay.wind.speed,
-                forecastDay.wind.deg,
+                forecastDay.wind.deg ?: 0f,
                 forecastDay.main.temp,
                 forecastDay.weather.get(0).main,
                 forecastDay.weather.get(0).description
@@ -161,7 +161,7 @@ fun DailyForecastOpenWeather.asDatabaseModel(): List<ForecastItemEntity> {
                 forecastDay.main.humidity,
                 forecastDay.main.pressure,
                 forecastDay.wind.speed,
-                forecastDay.wind.deg,
+                forecastDay.wind.deg ?: 0f,
                 forecastDay.main.temp,
                 forecastDay.weather.get(0).main,
                 forecastDay.weather.get(0).description
