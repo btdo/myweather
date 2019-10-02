@@ -1,4 +1,4 @@
-package com.example.myweather.debug
+package com.example.myweather.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -40,7 +40,7 @@ class MyWeatherWidget : AppWidgetProvider() {
             }
         }
 
-        internal suspend fun showInfo(context: Context, views: RemoteViews) {
+        private suspend fun showInfo(context: Context, views: RemoteViews) {
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
             val isMetric = sharedPreferences.getString(
                 context.resources.getString(R.string.pref_units_key),
@@ -63,7 +63,7 @@ class MyWeatherWidget : AppWidgetProvider() {
 
         }
 
-        internal fun setupButtonUpdate(context: Context, appWidgetId: Int, views: RemoteViews) {
+        private fun setupButtonUpdate(context: Context, appWidgetId: Int, views: RemoteViews) {
             val intentUpdate = Intent(context, MyWeatherWidget::class.java)
             intentUpdate.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
             val idArray = intArrayOf(appWidgetId)

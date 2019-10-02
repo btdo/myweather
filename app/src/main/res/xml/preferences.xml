@@ -17,7 +17,13 @@
 
         <SwitchPreferenceCompat
             app:key="@string/pref_hourly_sync_key"
+            app:defaultValue="false"
             app:title="@string/pref_hourly_sync_label" />
+
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="@string/pref_enable_geo_location_key"
+            app:title="@string/pref_enable_geo_location_label" />
 
         <EditTextPreference
             app:key="@string/pref_location_key"

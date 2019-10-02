@@ -212,7 +212,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     }
 
     /**
-     * Factory for constructing DevByteViewModel with parameter
+     * Factory for constructing HomeFragmentViewModel with parameter
      */
     class Factory(private val app: Application, private val city: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
