@@ -29,15 +29,12 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
 
     private lateinit var binding: FragmentHomeBinding
     private val viewModel: HomeFragmentViewModel by lazy {
-        val activity = requireNotNull(this.activity) {
-            "You can only access the viewModel after onActivityCreated()"
-        }
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireActivity()/* Activity context */)
         val location = sharedPreferences.getString(
             resources.getString(R.string.pref_location_key),
             resources.getString(R.string.pref_location_default)
         )
-        ViewModelProviders.of(this, HomeFragmentViewModel.Factory(activity.application, location!!))
+        ViewModelProviders.of(this, HomeFragmentViewModel.Factory(requireActivity().application, location!!))
             .get(HomeFragmentViewModel::class.java)
     }
     private lateinit var mSearchView: SearchView
@@ -108,7 +105,6 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         val isTrackLocationEnable =
             sharedPreferences.getBoolean(resources.getString(R.string.pref_enable_geo_location_key), false)
         if (isTrackLocationEnable) {
-            mTrackingLocation = true
             mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.requireActivity())
             startTrackingLocation()
         }
@@ -148,12 +144,12 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            ActivityCompat.requestPermissions(
-                this.requireActivity(),
+            requestPermissions(
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 REQUEST_LOCATION_PERMISSION
             )
         } else {
+            mTrackingLocation = true
             mFusedLocationClient.requestLocationUpdates(
                 getLocationRequest(), mLocationCallback,
                 null /* Looper */

@@ -153,7 +153,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
             .build()
 
         val workRequest =
-            PeriodicWorkRequestBuilder<WeatherSyncWorker>(15, TimeUnit.MINUTES)
+            PeriodicWorkRequestBuilder<WeatherSyncWorker>(60, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .setInputData(data).build()
         workManager.enqueueUniquePeriodicWork(
