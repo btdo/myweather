@@ -17,7 +17,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-class HomeFragmentViewModel(application: Application, initLocation: String) : AndroidViewModel(application) {
+class HomeFragmentViewModel(application: Application) : AndroidViewModel(application) {
     companion object {
         // backend returns in 3 hour internal, so 8x3= 24 for the upcoming day
         const val NUM_ITEMS_PER_DAY = 8
@@ -59,9 +59,8 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     val viewSelectedDay: LiveData<DailyForecastItem>
         get() = _viewSelectedDay
 
-    private val _location = MutableLiveData<String>().apply {
-        this.value = initLocation
-    }
+    private val _location = MutableLiveData<String>()
+
     val location: LiveData<String>
         get() {
             return _location
@@ -124,11 +123,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
         it.humidity
     }
 
-    init {
-        onLocationChange(initLocation, false)
-    }
-
-    fun onLocationChange(city: String, isForcedRefresh: Boolean) {
+    fun getWeatherForLocation(city: String, isForcedRefresh: Boolean) {
         _location.value = city
         getTodayWeather(city, isForcedRefresh)
         getDailyForecast(city, isForcedRefresh)
@@ -136,7 +131,7 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
 
     fun refresh() {
         _location.value?.let {
-            onLocationChange(it, true)
+            getWeatherForLocation(it, true)
         }
     }
 
@@ -214,11 +209,11 @@ class HomeFragmentViewModel(application: Application, initLocation: String) : An
     /**
      * Factory for constructing HomeFragmentViewModel with parameter
      */
-    class Factory(private val app: Application, private val city: String) : ViewModelProvider.Factory {
+    class Factory(private val app: Application) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(HomeFragmentViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return HomeFragmentViewModel(app, city) as T
+                return HomeFragmentViewModel(app) as T
             }
             throw IllegalArgumentException("Unable to construct viewmodel")
         }

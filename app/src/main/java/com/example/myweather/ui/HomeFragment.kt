@@ -5,7 +5,10 @@ import android.app.SearchManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.Location
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.*
 import android.widget.SearchView
 import android.widget.Toast
@@ -21,20 +24,27 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myweather.R
 import com.example.myweather.databinding.FragmentHomeBinding
 import com.google.android.gms.location.*
+import kotlinx.coroutines.*
+import timber.log.Timber
+import java.io.IOException
+import java.util.*
+import kotlin.coroutines.CoroutineContext
 
-class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener {
+class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
     }
 
+    private val job = SupervisorJob()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+    private val handler = CoroutineExceptionHandler { coroutineContext, throwable ->
+        Timber.e(throwable)
+    }
+
     private lateinit var binding: FragmentHomeBinding
     private val viewModel: HomeFragmentViewModel by lazy {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireActivity()/* Activity context */)
-        val location = sharedPreferences.getString(
-            resources.getString(R.string.pref_location_key),
-            resources.getString(R.string.pref_location_default)
-        )
-        ViewModelProviders.of(this, HomeFragmentViewModel.Factory(requireActivity().application, location!!))
+        ViewModelProviders.of(this, HomeFragmentViewModel.Factory(requireActivity().application))
             .get(HomeFragmentViewModel::class.java)
     }
     private lateinit var mSearchView: SearchView
@@ -46,11 +56,32 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         override fun onLocationResult(result: LocationResult?) {
             if (mTrackingLocation) {
                 result?.let {
-                    Toast.makeText(activity, "longtitude=" + it.lastLocation.longitude, Toast.LENGTH_SHORT)
-                        .show()
+                    launch(handler) {
+                        val deferred = async(Dispatchers.Default) {
+                            getLocation(it.lastLocation)
+                        }
+                        Toast.makeText(activity, "address=" + deferred.await(), Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
             }
         }
+    }
+
+    fun getLocation(location: Location): String {
+        val geoCoder = Geocoder(requireContext(), Locale.getDefault())
+        val addresses = geoCoder.getFromLocation(location.latitude, location.longitude, 1)
+        if (addresses == null || addresses.size == 0) {
+            throw IOException("Address not found")
+        }
+
+        val address = addresses.get(0)
+        val addressParts = mutableListOf<String>()
+        for (i in 0..address.maxAddressLineIndex) {
+            addressParts.add(address.getAddressLine(i))
+        }
+
+        return TextUtils.join(",", addressParts)
     }
 
     override fun onCreateView(
@@ -107,6 +138,15 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         if (isTrackLocationEnable) {
             mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.requireActivity())
             startTrackingLocation()
+        } else {
+            val location = sharedPreferences.getString(
+                resources.getString(R.string.pref_location_key),
+                resources.getString(R.string.pref_location_default)
+            )
+
+            location?.let {
+                viewModel.getWeatherForLocation(location, false)
+            }
         }
 
         return binding.root
@@ -114,7 +154,7 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, pref: String) {
         when (pref) {
-            resources.getString(R.string.pref_location_key) -> viewModel.onLocationChange(
+            resources.getString(R.string.pref_location_key) -> viewModel.getWeatherForLocation(
                 sharedPreferences.getString(
                     pref,
                     resources.getString(R.string.pref_location_default)
@@ -133,7 +173,7 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
             }
             resources.getString(R.string.pref_enable_geo_location_key) -> {
                 mTrackingLocation =
-                    sharedPreferences.getBoolean(resources.getString(R.string.pref_enable_geo_location_key), false)
+                    sharedPreferences.getBoolean(pref, false)
             }
         }
     }
@@ -192,7 +232,7 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
             object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(value: String?): Boolean {
                     value?.let {
-                        viewModel.onLocationChange(it, false)
+                        viewModel.getWeatherForLocation(it, false)
                     }
 
                     return true
@@ -243,5 +283,10 @@ class HomeFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        coroutineContext.cancelChildren()
     }
 }
