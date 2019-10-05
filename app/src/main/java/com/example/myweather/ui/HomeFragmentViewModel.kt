@@ -6,15 +6,16 @@ import androidx.work.*
 import com.example.myweather.database.ForecastItemDatabase
 import com.example.myweather.repository.DailyForecastItem
 import com.example.myweather.repository.ForecastItem
+import com.example.myweather.repository.GeoLocationRepository
 import com.example.myweather.repository.WeatherRepository
 import com.example.myweather.utils.WeatherUtils
 import com.example.myweather.worker.KEY_CITY_SYNC
 import com.example.myweather.worker.WeatherSyncWorker
 import com.example.myweather.worker.WeatherSyncWorker.Companion.MY_WEATHER_SYNC_BACKGROUND_WORK_NAME
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationResult
+import kotlinx.coroutines.*
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 class HomeFragmentViewModel(application: Application) : AndroidViewModel(application) {
@@ -40,7 +41,24 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
      */
     private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
-    private val repository = WeatherRepository(ForecastItemDatabase.getInstance(application))
+    private val weatherRepository = WeatherRepository(ForecastItemDatabase.getInstance(application))
+    private val geoLocationRepository = GeoLocationRepository(application.applicationContext)
+    private val handler = CoroutineExceptionHandler { _, throwable ->
+        Timber.e(throwable)
+    }
+
+    private var mLocationCallback = object : LocationCallback() {
+        override fun onLocationResult(result: LocationResult?) {
+            result?.let { locationResult ->
+                if (mIsTrackByLocationPref) {
+                    viewModelScope.launch(handler) {
+                        val address = geoLocationRepository.getAddress(locationResult.lastLocation)
+                        getWeatherByCity(address.city + "," + address.country, false)
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Event triggered for network error. This is private to avoid exposing a
@@ -66,19 +84,19 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
             return _location
         }
 
-    val description: LiveData<String> = Transformations.map(repository.todayForecast) {
+    val description: LiveData<String> = Transformations.map(weatherRepository.todayForecast) {
         it.mainDescription
     }
 
-    val temperature: LiveData<Double> = Transformations.map(repository.todayForecast) {
+    val temperature: LiveData<Double> = Transformations.map(weatherRepository.todayForecast) {
         it.temp
     }
 
-    val weatherId: LiveData<Int> = Transformations.map(repository.todayForecast) {
+    val weatherId: LiveData<Int> = Transformations.map(weatherRepository.todayForecast) {
         it.weatherId
     }
 
-    val dailyForecast: LiveData<List<DailyForecastItem>> = Transformations.map(repository.forecast) {
+    val dailyForecast: LiveData<List<DailyForecastItem>> = Transformations.map(weatherRepository.forecast) {
         // get a list of items that are more than 24 hours away from today
         val list = it.subList(NUM_ITEMS_PER_DAY, it.lastIndex)
         // group items within their days
@@ -88,7 +106,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         dailyForecastItems
     }
 
-    val hourlyForecast: LiveData<List<ForecastItem>> = Transformations.map(repository.forecast) {
+    val hourlyForecast: LiveData<List<ForecastItem>> = Transformations.map(weatherRepository.forecast) {
         it.subList(0, NUM_ITEMS_PER_DAY)
     }
 
@@ -99,31 +117,60 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
             return _isMetric
         }
 
-    val windSpeed: LiveData<Float> = Transformations.map(repository.todayForecast) {
+    val windSpeed: LiveData<Float> = Transformations.map(weatherRepository.todayForecast) {
         it.windSpeed
     }
 
-    val degrees: LiveData<Float> = Transformations.map(repository.todayForecast) {
+    val degrees: LiveData<Float> = Transformations.map(weatherRepository.todayForecast) {
         it.degrees
     }
 
-    val minTemp: LiveData<Double> = Transformations.map(repository.todayForecast) {
+    val minTemp: LiveData<Double> = Transformations.map(weatherRepository.todayForecast) {
         it.minTemp
     }
 
-    val maxTemp: LiveData<Double> = Transformations.map(repository.todayForecast) {
+    val maxTemp: LiveData<Double> = Transformations.map(weatherRepository.todayForecast) {
         it.maxTemp
     }
 
-    val pressure: LiveData<Double> = Transformations.map(repository.todayForecast) {
+    val pressure: LiveData<Double> = Transformations.map(weatherRepository.todayForecast) {
         it.pressure
     }
 
-    val humidity: LiveData<Int> = Transformations.map(repository.todayForecast) {
+    val humidity: LiveData<Int> = Transformations.map(weatherRepository.todayForecast) {
         it.humidity
     }
 
-    fun getWeatherForLocation(city: String, isForcedRefresh: Boolean) {
+    private var mIsTrackByLocationPref = false
+    private var mIsHourlySyncPref = false
+
+    fun onFragmentResume() {
+        if (mIsTrackByLocationPref) {
+            onStartTrackingByLocation()
+        }
+    }
+
+    fun onFragmentPause() {
+        if (mIsTrackByLocationPref) {
+            onStopTrackingByLocation()
+        }
+    }
+
+    fun getWeather(isTrackByLocationPref: Boolean, location: String) {
+        if (isTrackByLocationPref == mIsTrackByLocationPref) {
+            return
+        }
+
+        mIsTrackByLocationPref = isTrackByLocationPref
+        if (isTrackByLocationPref) {
+            onStartTrackingByLocation()
+        } else {
+            onStopTrackingByLocation()
+            getWeatherByCity(location, false)
+        }
+    }
+
+    fun getWeatherByCity(city: String, isForcedRefresh: Boolean) {
         _location.value = city
         getTodayWeather(city, isForcedRefresh)
         getDailyForecast(city, isForcedRefresh)
@@ -131,8 +178,17 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
     fun refresh() {
         _location.value?.let {
-            getWeatherForLocation(it, true)
+            getWeatherByCity(it, true)
         }
+    }
+
+    fun onHourlySyncPrefChange(isHourlySync: Boolean) {
+        if (mIsHourlySyncPref == isHourlySync) {
+            return
+        }
+
+        mIsHourlySyncPref = isHourlySync
+        if (isHourlySync) setupHourlySync() else cancelHourlySync()
     }
 
     fun cancelHourlySync() {
@@ -170,10 +226,18 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         _isMetric.value = isMetric
     }
 
+    private fun onStartTrackingByLocation() {
+        geoLocationRepository.startTrackingByLocation(mLocationCallback)
+    }
+
+    private fun onStopTrackingByLocation() {
+        geoLocationRepository.stopTrackingByLocation(mLocationCallback)
+    }
+
     private fun getTodayWeather(city: String, isForcedRefresh: Boolean) {
         viewModelScope.launch {
             try {
-                repository.getCurrentForecast(city, isForcedRefresh)
+                weatherRepository.getCurrentForecast(city, isForcedRefresh)
                 _showError.value = false
             } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.
@@ -185,7 +249,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     private fun getDailyForecast(city: String, isForcedRefresh: Boolean) {
         viewModelScope.launch {
             try {
-                repository.getComingDaysForecast(city, isForcedRefresh)
+                weatherRepository.getComingDaysForecast(city, isForcedRefresh)
                 _showError.value = false
             } catch (e: Exception) {
                 // Show a Toast error message and hide the progress bar.

@@ -1,6 +1,12 @@
 package com.example.myweather.repository
 
+import androidx.lifecycle.LiveData
+
 interface WeatherRepositoryInterface {
+
+    val todayForecast: LiveData<ForecastItem>
+
+    val forecast: LiveData<List<ForecastItem>>
 
     suspend fun clearCache()
 

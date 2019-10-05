@@ -16,14 +16,14 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
         const val MIN_ITEM_FORCAST_ITEMS = 40
     }
 
-    val todayForecast: LiveData<ForecastItem>
+    override val todayForecast: LiveData<ForecastItem>
         get() {
             return _currentForecast
         }
 
     private val _currentForecast = MutableLiveData<ForecastItem>()
 
-    val forecast: LiveData<List<ForecastItem>>
+    override val forecast: LiveData<List<ForecastItem>>
         get() {
             return _forecast
         }
