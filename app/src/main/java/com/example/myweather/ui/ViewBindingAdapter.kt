@@ -10,6 +10,13 @@ import com.example.myweather.repository.ForecastItem
 import com.example.myweather.utils.DateUtils
 import com.example.myweather.utils.WeatherUtils
 
+
+@BindingAdapter("location")
+fun bindLocation(view: TextView, location: String?) {
+    val city = location?.split(",")
+    view.text = city?.get(0)
+}
+
 @BindingAdapter("temperature", "isMetric")
 fun bindTemperature(view: TextView, temperature: Double, isMetric: Boolean) {
     val temp = WeatherUtils.formatTemperature(view.context, temperature, isMetric)
