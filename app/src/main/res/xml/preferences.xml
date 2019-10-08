@@ -28,6 +28,7 @@
         <EditTextPreference
             app:key="@string/pref_location_key"
             app:title="@string/pref_location_label"
+            app:defaultValue="Toronto,CA"
             app:useSimpleSummaryProvider="true" />
 
         <ListPreference

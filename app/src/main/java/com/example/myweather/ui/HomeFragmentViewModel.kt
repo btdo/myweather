@@ -2,21 +2,13 @@ package com.example.myweather.ui
 
 import android.app.Application
 import androidx.lifecycle.*
-import androidx.work.*
 import com.example.myweather.database.ForecastItemDatabase
-import com.example.myweather.repository.DailyForecastItem
-import com.example.myweather.repository.ForecastItem
-import com.example.myweather.repository.GeoLocationRepository
-import com.example.myweather.repository.WeatherRepository
+import com.example.myweather.repository.*
 import com.example.myweather.utils.WeatherUtils
-import com.example.myweather.worker.KEY_CITY_SYNC
-import com.example.myweather.worker.WeatherSyncWorker
-import com.example.myweather.worker.WeatherSyncWorker.Companion.MY_WEATHER_SYNC_BACKGROUND_WORK_NAME
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import kotlinx.coroutines.*
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 class HomeFragmentViewModel(application: Application) : AndroidViewModel(application) {
     companion object {
@@ -31,8 +23,6 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
      */
     private val viewModelJob = SupervisorJob()
 
-    private val workManager = WorkManager.getInstance(application)
-
     /**
      * This is the main scope for all coroutines launched by MainViewModel.
      *
@@ -41,8 +31,14 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
      */
     private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
-    private val weatherRepository = WeatherRepository(ForecastItemDatabase.getInstance(application))
-    private val geoLocationRepository = GeoLocationRepository(application.applicationContext)
+    private val weatherRepository: WeatherRepositoryInterface =
+        WeatherRepository(ForecastItemDatabase.getInstance(application))
+    private val geoLocationRepository: GeoLocationRepositoryInterface by lazy {
+        GeoLocationRepository(application.applicationContext)
+    }
+    private val workManagerRepository: WorkManagerRepositoryInterface by lazy {
+        WorkManagerRepository(application)
+    }
     private val handler = CoroutineExceptionHandler { _, throwable ->
         Timber.e(throwable)
     }
@@ -191,27 +187,12 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         if (isHourlySync) setupHourlySync() else cancelHourlySync()
     }
 
-    fun cancelHourlySync() {
-        workManager.cancelUniqueWork(MY_WEATHER_SYNC_BACKGROUND_WORK_NAME)
+    private fun cancelHourlySync() {
+        workManagerRepository.cancelHourlySync()
     }
 
-    fun setupHourlySync() {
-        val data = workDataOf(
-            KEY_CITY_SYNC to _location.value
-        )
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.UNMETERED)
-            .build()
-
-        val workRequest =
-            PeriodicWorkRequestBuilder<WeatherSyncWorker>(60, TimeUnit.MINUTES)
-                .setConstraints(constraints)
-                .setInputData(data).build()
-        workManager.enqueueUniquePeriodicWork(
-            MY_WEATHER_SYNC_BACKGROUND_WORK_NAME,
-            ExistingPeriodicWorkPolicy.REPLACE,
-            workRequest
-        )
+    private fun setupHourlySync() {
+        workManagerRepository.enableHourlySync()
     }
 
     fun viewSelectedDay(day: DailyForecastItem) {
@@ -227,11 +208,11 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun onStartTrackingByLocation() {
-        geoLocationRepository.startTrackingByLocation(mLocationCallback)
+        geoLocationRepository.locationTracking(mLocationCallback)
     }
 
     private fun onStopTrackingByLocation() {
-        geoLocationRepository.stopTrackingByLocation(mLocationCallback)
+        geoLocationRepository.stopLocationTracking(mLocationCallback)
     }
 
     private fun getTodayWeather(city: String, isForcedRefresh: Boolean) {

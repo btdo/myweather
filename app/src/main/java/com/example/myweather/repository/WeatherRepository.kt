@@ -36,15 +36,15 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
         }
     }
 
-    override suspend fun getCurrentForecast(city: String, isForcedRefresh: Boolean): ForecastItem {
+    override suspend fun getCurrentForecast(location: String, isForcedRefresh: Boolean): ForecastItem {
         return withContext(Dispatchers.IO) {
             val currentHour = DateUtils.getCurrentHour()
-            var dbItem = database.forecastItemDao.query(currentHour, city.trim().toLowerCase())
+            var dbItem = database.forecastItemDao.query(currentHour, location.trim().toLowerCase())
             if (dbItem == null || isForcedRefresh) {
-                val networkItem = WeatherApi.weatherService.getCurrentWeather(city).await()
+                val networkItem = WeatherApi.weatherService.getCurrentWeather(location).await()
                 dbItem = networkItem.asDatabaseModel()
                 database.forecastItemDao.insert(dbItem)
-                database.forecastItemDao.clearPastItems(city, currentHour)
+                database.forecastItemDao.clearPastItems(location, currentHour)
             }
 
             val domainModel = dbItem.asDomainModel()
@@ -56,17 +56,17 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
     /**
      * backend return forecast for the next 5 days with a 3 hour interval
      */
-    override suspend fun getComingDaysForecast(city: String, isForcedRefresh: Boolean): List<ForecastItem> {
+    override suspend fun getComingDaysForecast(location: String, isForcedRefresh: Boolean): List<ForecastItem> {
         return withContext(Dispatchers.IO) {
             val currentHour = DateUtils.getCurrentHour()
             val forecastItems: List<ForecastItem>
             val forecastItemsDb =
-                database.forecastItemDao.queryFutureWeatherItems(currentHour, city)
+                database.forecastItemDao.queryFutureWeatherItems(currentHour, location)
             if (forecastItemsDb.size < MIN_ITEM_FORCAST_ITEMS || isForcedRefresh) {
-                val forecastWeather = WeatherApi.weatherService.getDailyForecast(city).await()
+                val forecastWeather = WeatherApi.weatherService.getDailyForecast(location).await()
                 forecastItems = forecastWeather.asDomainModel().filter { item -> item.date > currentHour }
                 val dbItems = forecastWeather.asDatabaseModel().filter { item -> item.date > currentHour }
-                database.forecastItemDao.clearFutureItems(city, currentHour)
+                database.forecastItemDao.clearFutureItems(location, currentHour)
                 database.forecastItemDao.insertAll(dbItems)
             } else {
                 forecastItems = forecastItemsDb.map { item ->

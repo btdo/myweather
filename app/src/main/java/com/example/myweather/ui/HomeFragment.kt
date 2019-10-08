@@ -89,12 +89,12 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
             refresh()
         }
 
-        onHourlySyncPreferenceChange()
-        onLocationPreferenceChange()
+        onHourlySyncPreference()
+        onLocationPreference()
         return binding.root
     }
 
-    fun onLocationPreferenceChange() {
+    private fun onLocationPreference() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
         val isTrackLocationEnable =
             sharedPreferences.getBoolean(resources.getString(R.string.pref_enable_geo_location_key), false)
@@ -106,7 +106,7 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
         viewModel.getWeather(isTrackLocationEnable, location!!)
     }
 
-    fun onHourlySyncPreferenceChange() {
+    private fun onHourlySyncPreference() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
         val hourlySync = sharedPreferences.getBoolean(resources.getString(R.string.pref_hourly_sync_key), false)
         viewModel.onHourlySyncPrefChange(hourlySync)
@@ -114,12 +114,12 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, pref: String) {
         when (pref) {
-            resources.getString(R.string.pref_location_key) -> onLocationPreferenceChange()
+            resources.getString(R.string.pref_location_key) -> onLocationPreference()
             resources.getString(R.string.pref_units_key) -> {
                 val isMetric = sharedPreferences.getString(pref, "") == resources.getString(R.string.pref_units_metric)
                 viewModel.onUnitChanged(isMetric)
             }
-            resources.getString(R.string.pref_hourly_sync_key) -> onHourlySyncPreferenceChange()
+            resources.getString(R.string.pref_hourly_sync_key) -> onHourlySyncPreference()
             resources.getString(R.string.pref_enable_geo_location_key) -> {
                 if (sharedPreferences.getBoolean(pref, false)) startTrackingLocation() else stopTrackingLocation()
             }
@@ -127,7 +127,7 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
     }
 
     private fun stopTrackingLocation() {
-        onLocationPreferenceChange()
+        onLocationPreference()
     }
 
     private fun startTrackingLocation() {
@@ -141,7 +141,7 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
                 REQUEST_LOCATION_PERMISSION
             )
         } else {
-            onLocationPreferenceChange()
+            onLocationPreference()
         }
     }
 

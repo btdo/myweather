@@ -7,6 +7,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.OnCompleteListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -16,14 +17,14 @@ class GeoLocationRepository(private val mContext: Context) : GeoLocationReposito
 
     private var mFusedLocationClient: FusedLocationProviderClient? = null
 
-    override fun startTrackingByLocation(locationCallBack: LocationCallback) {
+    override fun locationTracking(locationCallBack: LocationCallback) {
         try {
             if (mFusedLocationClient == null) {
                 mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext)
             }
 
             mFusedLocationClient?.requestLocationUpdates(
-                getLocationRequest(), locationCallBack,
+                getFrequentHighAccuracyLocationRequest(), locationCallBack,
                 null /* Looper */
             )
         } catch (e: SecurityException) {
@@ -31,7 +32,19 @@ class GeoLocationRepository(private val mContext: Context) : GeoLocationReposito
         }
     }
 
-    override fun stopTrackingByLocation(locationCallBack: LocationCallback) {
+    override fun getCurrentLocation(locationCallBack: OnCompleteListener<Location>) {
+        try {
+            if (mFusedLocationClient == null) {
+                mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext)
+            }
+
+            mFusedLocationClient?.lastLocation?.addOnCompleteListener(locationCallBack)
+        } catch (e: SecurityException) {
+            throw e
+        }
+    }
+
+    override fun stopLocationTracking(locationCallBack: LocationCallback) {
         mFusedLocationClient?.removeLocationUpdates(locationCallBack)
     }
 
@@ -51,7 +64,7 @@ class GeoLocationRepository(private val mContext: Context) : GeoLocationReposito
         return@withContext Address(address.locality, address.countryCode, location.latitude, location.longitude)
     }
 
-    private fun getLocationRequest(): LocationRequest {
+    private fun getFrequentHighAccuracyLocationRequest(): LocationRequest {
         val locationRequest = LocationRequest()
         locationRequest.interval = 100000
         locationRequest.fastestInterval = 50000
