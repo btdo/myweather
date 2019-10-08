@@ -22,7 +22,7 @@ data class TodayOpenWeather(
 
 fun TodayOpenWeather.asDomainModel(): ForecastItem {
     return ForecastItem(
-        name,
+        name.trim().toLowerCase() + "," + sys.country?.trim()?.toLowerCase(),
         dt,
         weather[0].id,
         main.temp_min,
@@ -39,7 +39,7 @@ fun TodayOpenWeather.asDomainModel(): ForecastItem {
 
 fun TodayOpenWeather.asDatabaseModel(): ForecastItemEntity {
     return ForecastItemEntity(
-        name.trim().toLowerCase(),
+        name.trim().toLowerCase() + "," + sys.country?.trim()?.toLowerCase(),
         DateUtils.getCurrentHour(),
         weather[0].id,
         main.temp_min,
@@ -129,7 +129,7 @@ fun DailyForecastOpenWeather.asDomainModel(): List<ForecastItem> {
     list.map { forecastDay ->
         forecastDaysWeather.add(
             ForecastItem(
-                city.name,
+                city.name.trim().toLowerCase() + "," + city.country.trim().toLowerCase(),
                 DateUtils.normalizeDateTime(forecastDay.dt),
                 forecastDay.weather.get(0).id,
                 forecastDay.main.temp_min,
@@ -153,7 +153,7 @@ fun DailyForecastOpenWeather.asDatabaseModel(): List<ForecastItemEntity> {
     list.map { forecastDay ->
         forecastDaysWeather.add(
             ForecastItemEntity(
-                city.name,
+                city.name.trim().toLowerCase() + "," + city.country.trim().toLowerCase(),
                 DateUtils.normalizeDateTime(forecastDay.dt),
                 forecastDay.weather.get(0).id,
                 forecastDay.main.temp_min,

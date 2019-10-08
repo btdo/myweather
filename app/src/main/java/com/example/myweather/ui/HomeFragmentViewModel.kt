@@ -10,7 +10,12 @@ import com.google.android.gms.location.LocationResult
 import kotlinx.coroutines.*
 import timber.log.Timber
 
-class HomeFragmentViewModel(application: Application) : AndroidViewModel(application) {
+class HomeFragmentViewModel(
+    application: Application,
+    private var mIsTrackByLocationPref: Boolean,
+    val defaultLocation: String,
+    private var mIsHourlySyncPref: Boolean
+) : AndroidViewModel(application) {
     companion object {
         // backend returns in 3 hour internal, so 8x3= 24 for the upcoming day
         const val NUM_ITEMS_PER_DAY = 8
@@ -49,7 +54,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
                 if (mIsTrackByLocationPref) {
                     viewModelScope.launch(handler) {
                         val address = geoLocationRepository.getAddress(locationResult.lastLocation)
-                        getWeatherByCity(address.city + "," + address.country, false)
+                        getWeatherByLocation(address.city + "," + address.country, false)
                     }
                 }
             }
@@ -73,7 +78,9 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     val viewSelectedDay: LiveData<DailyForecastItem>
         get() = _viewSelectedDay
 
-    private val _location = MutableLiveData<String>()
+    private val _location = MutableLiveData<String>().apply {
+        defaultLocation
+    }
 
     val location: LiveData<String>
         get() {
@@ -137,8 +144,13 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         it.humidity
     }
 
-    private var mIsTrackByLocationPref = false
-    private var mIsHourlySyncPref = false
+    init {
+        if (mIsTrackByLocationPref) {
+            onStartTrackingByLocation()
+        } else {
+            getWeatherByLocation(defaultLocation, false)
+        }
+    }
 
     fun onFragmentResume() {
         if (mIsTrackByLocationPref) {
@@ -152,7 +164,12 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun getWeather(isTrackByLocationPref: Boolean, location: String) {
+    fun onLocationChange(location: String) {
+        onStopTrackingByLocation()
+        getWeatherByLocation(location, false)
+    }
+
+    fun onLocationTrackingPreferenceChange(isTrackByLocationPref: Boolean, location: String) {
         if (isTrackByLocationPref == mIsTrackByLocationPref) {
             return
         }
@@ -161,12 +178,11 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         if (isTrackByLocationPref) {
             onStartTrackingByLocation()
         } else {
-            onStopTrackingByLocation()
-            getWeatherByCity(location, false)
+            onLocationChange(location)
         }
     }
 
-    fun getWeatherByCity(city: String, isForcedRefresh: Boolean) {
+    fun getWeatherByLocation(city: String, isForcedRefresh: Boolean) {
         _location.value = city
         getTodayWeather(city, isForcedRefresh)
         getDailyForecast(city, isForcedRefresh)
@@ -174,25 +190,17 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
     fun refresh() {
         _location.value?.let {
-            getWeatherByCity(it, true)
+            getWeatherByLocation(it, true)
         }
     }
 
-    fun onHourlySyncPrefChange(isHourlySync: Boolean) {
+    fun onHourlySyncPreferenceChange(isHourlySync: Boolean) {
         if (mIsHourlySyncPref == isHourlySync) {
             return
         }
 
         mIsHourlySyncPref = isHourlySync
-        if (isHourlySync) setupHourlySync() else cancelHourlySync()
-    }
-
-    private fun cancelHourlySync() {
-        workManagerRepository.cancelHourlySync()
-    }
-
-    private fun setupHourlySync() {
-        workManagerRepository.enableHourlySync()
+        if (isHourlySync) workManagerRepository.enableHourlySync() else workManagerRepository.cancelHourlySync()
     }
 
     fun viewSelectedDay(day: DailyForecastItem) {
@@ -254,11 +262,16 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     /**
      * Factory for constructing HomeFragmentViewModel with parameter
      */
-    class Factory(private val app: Application) : ViewModelProvider.Factory {
+    class Factory(
+        val app: Application,
+        val isTrackByLocationPref: Boolean,
+        val defaultLocation: String,
+        val isHourlySyncPref: Boolean
+    ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(HomeFragmentViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return HomeFragmentViewModel(app) as T
+                return HomeFragmentViewModel(app, isTrackByLocationPref, defaultLocation, isHourlySyncPref) as T
             }
             throw IllegalArgumentException("Unable to construct viewmodel")
         }

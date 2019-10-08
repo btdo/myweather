@@ -5,7 +5,7 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class ForecastItem(
-    val city: String,
+    val location: String,
     val date: Long,
     val weatherId: Int,
     val minTemp: Double,

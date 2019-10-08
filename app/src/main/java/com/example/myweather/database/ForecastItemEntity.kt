@@ -3,9 +3,9 @@ package com.example.myweather.database
 import androidx.room.Entity
 import com.example.myweather.repository.ForecastItem
 
-@Entity(tableName = "forecast_item_table", primaryKeys = ["date", "city"])
+@Entity(tableName = "forecast_item_table", primaryKeys = ["date", "location"])
 data class ForecastItemEntity(
-    val city: String,
+    val location: String,
     val date: Long,
     val weatherId: Int,
     val minTemp: Double,
@@ -22,7 +22,7 @@ data class ForecastItemEntity(
 
 fun ForecastItemEntity.asDomainModel(): ForecastItem {
     return ForecastItem(
-        city,
+        location,
         date,
         weatherId,
         minTemp,

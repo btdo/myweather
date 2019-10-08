@@ -61,7 +61,7 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
             val currentHour = DateUtils.getCurrentHour()
             val forecastItems: List<ForecastItem>
             val forecastItemsDb =
-                database.forecastItemDao.queryFutureWeatherItems(currentHour, location)
+                database.forecastItemDao.queryFutureWeatherItems(currentHour, location.trim().toLowerCase())
             if (forecastItemsDb.size < MIN_ITEM_FORCAST_ITEMS || isForcedRefresh) {
                 val forecastWeather = WeatherApi.weatherService.getDailyForecast(location).await()
                 forecastItems = forecastWeather.asDomainModel().filter { item -> item.date > currentHour }
