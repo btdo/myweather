@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.example.myweather.ui.DayDetailsViewModel" />
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/margin_xlarge"
+        tools:context=".ui.DayDetailsFragment">
+
+        <TextView
+            android:id="@+id/day"
+            style="@style/pageTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:date="@{viewModel.date}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Tuesday" />
+
+        <ImageView
+            android:id="@+id/weather_icon"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/margin_normal"
+            android:adjustViewBounds="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/day"
+            app:weatherId="@{viewModel.weatherId}"
+            tools:src="@drawable/art_clouds" />
+
+        <TextView
+            android:id="@+id/temperature"
+            style="@style/pageSubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_normal"
+            app:isMetric="@{viewModel.isMetric}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/weather_icon"
+            app:temperature="@{viewModel.temperature}"
+            tools:text="18" />
+
+
+        <TextView
+            android:id="@+id/description_value"
+            style="@style/pageSubTitle"
+            android:layout_marginTop="@dimen/margin_normal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/temperature"
+            app:weatherId="@{viewModel.weatherId}"
+            tools:text="Cloudy" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="@dimen/margin_large"
+            android:background="@color/divider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/description_value" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/hourlyForecast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_large"
+            app:dayHourlyList="@{viewModel.hourlyForecast}"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider"
+            tools:itemCount="5"
+            tools:listitem="@layout/day_details_hourly_forecast_item" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>

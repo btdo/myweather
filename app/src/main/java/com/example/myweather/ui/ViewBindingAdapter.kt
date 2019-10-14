@@ -57,6 +57,15 @@ fun bindHourlyForecastRecyclerView(
     adapter.submitList(data)
 }
 
+@BindingAdapter("dayHourlyList")
+fun bindDayHourlyForecastRecyclerView(
+    recyclerView: RecyclerView,
+    data: List<ForecastItem>?
+) {
+    val adapter = recyclerView.adapter as DayDetailsHourlyAdapter
+    adapter.submitList(data)
+}
+
 @BindingAdapter("windSpeed", "degrees", "isMetric")
 fun bindWindSpeed(view: TextView, windSpeed: Float, degrees: Float, isMetric: Boolean) {
     val wind =

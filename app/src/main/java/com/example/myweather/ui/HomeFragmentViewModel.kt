@@ -14,7 +14,8 @@ class HomeFragmentViewModel(
     application: Application,
     private var mIsTrackByLocationPref: Boolean,
     val defaultLocation: String,
-    private var mIsHourlySyncPref: Boolean
+    private var mIsHourlySyncPref: Boolean,
+    private val isMetr: Boolean
 ) : AndroidViewModel(application) {
     companion object {
         // backend returns in 3 hour internal, so 8x3= 24 for the upcoming day
@@ -113,7 +114,7 @@ class HomeFragmentViewModel(
         it.subList(0, NUM_ITEMS_PER_DAY)
     }
 
-    private val _isMetric = MutableLiveData<Boolean>().apply { this.value = true }
+    private val _isMetric = MutableLiveData<Boolean>().apply { this.value = isMetr }
 
     val isMetric: LiveData<Boolean>
         get() {
@@ -266,12 +267,18 @@ class HomeFragmentViewModel(
         val app: Application,
         val isTrackByLocationPref: Boolean,
         val defaultLocation: String,
-        val isHourlySyncPref: Boolean
+        val isHourlySyncPref: Boolean, val isMetric: Boolean
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(HomeFragmentViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return HomeFragmentViewModel(app, isTrackByLocationPref, defaultLocation, isHourlySyncPref) as T
+                return HomeFragmentViewModel(
+                    app,
+                    isTrackByLocationPref,
+                    defaultLocation,
+                    isHourlySyncPref,
+                    isMetric
+                ) as T
             }
             throw IllegalArgumentException("Unable to construct viewmodel")
         }

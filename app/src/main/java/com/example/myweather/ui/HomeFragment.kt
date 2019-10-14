@@ -46,9 +46,19 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
             resources.getString(R.string.pref_location_default)
         )!!
         val hourlySync = sharedPreferences.getBoolean(resources.getString(R.string.pref_hourly_sync_key), false)
+        val isMetric = sharedPreferences.getString(
+            resources.getString(R.string.pref_units_key),
+            ""
+        ) == resources.getString(R.string.pref_units_metric)
         ViewModelProviders.of(
             this,
-            HomeFragmentViewModel.Factory(requireActivity().application, isTrackLocationEnable, location, hourlySync)
+            HomeFragmentViewModel.Factory(
+                requireActivity().application,
+                isTrackLocationEnable,
+                location,
+                hourlySync,
+                isMetric
+            )
         )
             .get(HomeFragmentViewModel::class.java)
     }
@@ -65,15 +75,16 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
 
-        val adapter = DailyForecastAdapter(context!!, viewModel.isMetric.value ?: true, ForecastClickListener { day ->
+        val adapter =
+            DailyForecastAdapter(requireContext(), viewModel.isMetric.value ?: true, ForecastClickListener { day ->
             viewModel.viewSelectedDay(day)
         })
         binding.content.dailyForecast.adapter = adapter
 
-        val hourlyAdapter = HourlyForecastAdapter(context!!, viewModel.isMetric.value ?: true)
+        val hourlyAdapter = HourlyForecastAdapter(requireContext(), viewModel.isMetric.value ?: true)
         binding.content.hourlyForecast.adapter = hourlyAdapter
         binding.content.hourlyForecast.layoutManager =
-            LinearLayoutManager(context!!, LinearLayoutManager.HORIZONTAL, false)
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
         viewModel.isMetric.observe(viewLifecycleOwner, Observer { isMetric ->
             adapter.mIsMetric = isMetric ?: true
@@ -231,7 +242,9 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     startTrackingLocation()
                 } else {
-                    // TODO - set geo location preference to false
+                    val editor = mSharedPreferences.edit()
+                    editor.putBoolean(resources.getString(R.string.pref_enable_geo_location_key), false)
+                    editor.apply()
                     Toast.makeText(this.requireContext(), R.string.location_permission_denied, Toast.LENGTH_SHORT)
                         .show()
                 }

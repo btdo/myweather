@@ -37,7 +37,7 @@ class HourlyForecastAdapter(
         }
 
         override fun areContentsTheSame(oldItem: ForecastItem, newItem: ForecastItem): Boolean {
-            return oldItem.date == newItem.date
+            return oldItem == newItem
         }
     }
 
