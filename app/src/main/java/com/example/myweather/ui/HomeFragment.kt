@@ -20,10 +20,12 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myweather.R
 import com.example.myweather.databinding.FragmentHomeBinding
+import com.example.myweather.utils.Json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
+import org.json.JSONArray
 import kotlin.coroutines.CoroutineContext
 
 class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -35,6 +37,9 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + mJob
 
+    private val cityList: JSONArray by lazy {
+        Json.readFromResources(requireContext(), R.raw.city_list)
+    }
 
     private lateinit var binding: FragmentHomeBinding
     private val viewModel: HomeFragmentViewModel by lazy {
@@ -50,6 +55,7 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
             resources.getString(R.string.pref_units_key),
             ""
         ) == resources.getString(R.string.pref_units_metric)
+
         ViewModelProviders.of(
             this,
             HomeFragmentViewModel.Factory(
@@ -59,8 +65,7 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
                 hourlySync,
                 isMetric
             )
-        )
-            .get(HomeFragmentViewModel::class.java)
+        ).get(HomeFragmentViewModel::class.java)
     }
     private lateinit var mSearchView: SearchView
     private lateinit var mMenuItem: MenuItem

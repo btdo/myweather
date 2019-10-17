@@ -13,7 +13,7 @@ import timber.log.Timber
 class HomeFragmentViewModel(
     application: Application,
     private var mIsTrackByLocationPref: Boolean,
-    val defaultLocation: String,
+    private val defaultLocation: String,
     private var mIsHourlySyncPref: Boolean,
     private val isMetr: Boolean
 ) : AndroidViewModel(application) {
@@ -37,14 +37,18 @@ class HomeFragmentViewModel(
      */
     private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
+
     private val weatherRepository: WeatherRepositoryInterface =
         WeatherRepository(ForecastItemDatabase.getInstance(application))
+
     private val geoLocationRepository: GeoLocationRepositoryInterface by lazy {
         GeoLocationRepository(application.applicationContext)
     }
+
     private val workManagerRepository: WorkManagerRepositoryInterface by lazy {
         WorkManagerRepository(application)
     }
+
     private val handler = CoroutineExceptionHandler { _, throwable ->
         Timber.e(throwable)
     }
@@ -183,10 +187,10 @@ class HomeFragmentViewModel(
         }
     }
 
-    fun getWeatherByLocation(city: String, isForcedRefresh: Boolean) {
-        _location.value = city
-        getTodayWeather(city, isForcedRefresh)
-        getDailyForecast(city, isForcedRefresh)
+    fun getWeatherByLocation(location: String, isForcedRefresh: Boolean) {
+        _location.value = location
+        getTodayWeather(location, isForcedRefresh)
+        getDailyForecast(location, isForcedRefresh)
     }
 
     fun refresh() {
@@ -264,10 +268,10 @@ class HomeFragmentViewModel(
      * Factory for constructing HomeFragmentViewModel with parameter
      */
     class Factory(
-        val app: Application,
-        val isTrackByLocationPref: Boolean,
-        val defaultLocation: String,
-        val isHourlySyncPref: Boolean, val isMetric: Boolean
+        private val app: Application,
+        private val isTrackByLocationPref: Boolean,
+        private val defaultLocation: String,
+        private val isHourlySyncPref: Boolean, val isMetric: Boolean
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(HomeFragmentViewModel::class.java)) {
