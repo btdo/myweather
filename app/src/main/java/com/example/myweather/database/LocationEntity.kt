@@ -15,8 +15,9 @@ data class LocationEntity(
 )
 
 fun JSONObject.asCityLocationEntity(): LocationEntity {
-    val lat = this.getJSONObject("coord").get("lat") as Double
-    val lon = this.getJSONObject("coord").get("lon") as Double
+    val coordJson = this.optJSONObject("coord")
+    val lat = coordJson.get("lat") as Double
+    val lon = coordJson.get("lon") as Double
     val name = this.getString("name")
     val country = this.getString("country")
     val id = this.getInt("id")

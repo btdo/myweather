@@ -150,6 +150,7 @@ class HomeFragmentViewModel(
     }
 
     init {
+        getCity("Hurzuf")
         if (mIsTrackByLocationPref) {
             onStartTrackingByLocation()
         } else {
@@ -184,6 +185,18 @@ class HomeFragmentViewModel(
             onStartTrackingByLocation()
         } else {
             onLocationChange(location)
+        }
+    }
+
+    fun getCity(city: String) {
+        viewModelScope.launch {
+            try {
+                weatherRepository.getLocation(city)
+                _showError.value = false
+            } catch (e: Exception) {
+                // Show a Toast error message and hide the progress bar.
+                _showError.value = true
+            }
         }
     }
 

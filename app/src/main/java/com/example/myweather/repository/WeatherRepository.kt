@@ -3,7 +3,9 @@ package com.example.myweather.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.myweather.database.ForecastItemDatabase
+import com.example.myweather.database.asCityModel
 import com.example.myweather.database.asDomainModel
+import com.example.myweather.network.City
 import com.example.myweather.network.WeatherApi
 import com.example.myweather.network.asDatabaseModel
 import com.example.myweather.network.asDomainModel
@@ -33,6 +35,20 @@ class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRep
     override suspend fun clearCache() {
         withContext(Dispatchers.IO) {
             database.forecastItemDao.clearAll()
+        }
+    }
+
+    override suspend fun getLocation(cityName: String): List<City> {
+        return withContext(Dispatchers.IO) {
+            val dbCities = database.locationDao.queryCity(cityName)
+            var modelCities = listOf<City>()
+            dbCities?.let {
+                modelCities = it.map { locationEntity ->
+                    locationEntity.asCityModel()
+                }
+            }
+
+            return@withContext modelCities
         }
     }
 

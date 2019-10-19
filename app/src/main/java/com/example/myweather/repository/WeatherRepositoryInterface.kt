@@ -1,6 +1,7 @@
 package com.example.myweather.repository
 
 import androidx.lifecycle.LiveData
+import com.example.myweather.network.City
 
 interface WeatherRepositoryInterface {
 
@@ -10,7 +11,9 @@ interface WeatherRepositoryInterface {
 
     suspend fun clearCache()
 
-    suspend fun getCurrentForecast(city: String, isForcedRefresh: Boolean): ForecastItem
+    suspend fun getCurrentForecast(location: String, isForcedRefresh: Boolean): ForecastItem
 
-    suspend fun getComingDaysForecast(city: String, isForcedRefresh: Boolean): List<ForecastItem>
+    suspend fun getComingDaysForecast(location: String, isForcedRefresh: Boolean): List<ForecastItem>
+
+    suspend fun getLocation(cityName: String): List<City>
 }
