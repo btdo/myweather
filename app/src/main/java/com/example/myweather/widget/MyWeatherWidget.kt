@@ -8,7 +8,7 @@ import android.content.Intent
 import android.widget.RemoteViews
 import androidx.preference.PreferenceManager
 import com.example.myweather.R
-import com.example.myweather.database.ForecastItemDatabase
+import com.example.myweather.database.AppDatabase
 import com.example.myweather.repository.WeatherRepository
 import com.example.myweather.utils.WeatherUtils
 import kotlinx.coroutines.runBlocking
@@ -51,7 +51,7 @@ class MyWeatherWidget : AppWidgetProvider() {
                 context.resources.getString(R.string.pref_location_default)
             ) ?: "Toronto"
 
-            val database = ForecastItemDatabase.getInstance(context)
+            val database = AppDatabase.getInstance(context)
             val repository = WeatherRepository(database)
             val currentWeather = repository.getCurrentForecast(location, false)
             views.setTextViewText(R.id.appwidget_city, location)

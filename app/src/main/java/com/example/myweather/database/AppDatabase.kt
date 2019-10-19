@@ -16,7 +16,7 @@ import java.io.InputStreamReader
 import java.io.Serializable
 
 @Database(entities = [ForecastItemEntity::class, LocationEntity::class], version = 1, exportSchema = false)
-abstract class ForecastItemDatabase : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
 
     abstract val forecastItemDao: ForecastItemDao
     abstract val locationDao: LocationDao
@@ -24,16 +24,16 @@ abstract class ForecastItemDatabase : RoomDatabase() {
     companion object {
 
         @Volatile
-        private var INSTANCE: ForecastItemDatabase? = null
+        private var INSTANCE: AppDatabase? = null
 
-        fun getInstance(context: Context): ForecastItemDatabase {
+        fun getInstance(context: Context): AppDatabase {
             synchronized(this) {
                 var instance = INSTANCE
 
                 if (instance == null) {
                     instance = Room.databaseBuilder(
                         context.applicationContext,
-                        ForecastItemDatabase::class.java,
+                        AppDatabase::class.java,
                         "forecast_item_database"
                     ).addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
@@ -49,11 +49,11 @@ abstract class ForecastItemDatabase : RoomDatabase() {
             }
         }
 
-        private fun prepopulateDb(context: Context, db: ForecastItemDatabase) {
+        private fun prepopulateDb(context: Context, db: AppDatabase) {
             readFromResources(context.applicationContext, R.raw.city_list, db)
         }
 
-        private fun readFromResources(context: Context, resource: Int, db: ForecastItemDatabase) {
+        private fun readFromResources(context: Context, resource: Int, db: AppDatabase) {
             var reader: JsonReader? = null
             try {
                 val inputStream: InputStream = context.resources.openRawResource(resource)
@@ -77,17 +77,11 @@ abstract class ForecastItemDatabase : RoomDatabase() {
 }
 
 data class CityJson(val json: JSONObject) {
-    var id: Int
-    var country: String
-    var coord: CoordJson
-    var name: String
+    var id: Int = json.optInt("id")
+    var country: String = json.optString("country")
+    var coord: CoordJson = CoordJson(json.getJSONObject("coord"))
+    var name: String = json.optString("name")
 
-    init {
-        id = json.optInt("id")
-        country = json.optString("country")
-        coord = CoordJson(json.optJSONObject("coord"))
-        name = json.optString("name")
-    }
 }
 
 fun CityJson.asCityLocationEntity(): LocationEntity {
@@ -96,12 +90,8 @@ fun CityJson.asCityLocationEntity(): LocationEntity {
 
 data class CoordJson(val json: JSONObject) : Serializable {
     @SerializedName("lon")
-    var lon: Double
+    var lon: Double = json.optDouble("lon")
     @SerializedName("lat")
-    var lat: Double
+    var lat: Double = json.optDouble("lat")
 
-    init {
-        lon = json.optDouble("lon")
-        lat = json.optDouble("lat")
-    }
 }

@@ -6,7 +6,7 @@ import androidx.preference.PreferenceManager
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.myweather.R
-import com.example.myweather.database.ForecastItemDatabase
+import com.example.myweather.database.AppDatabase
 import com.example.myweather.repository.GeoLocationRepository
 import com.example.myweather.repository.GeoLocationRepositoryInterface
 import com.example.myweather.repository.WeatherRepository
@@ -24,8 +24,8 @@ class WeatherSyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorke
         const val MY_WEATHER_SYNC_BACKGROUND_WORK_NAME = "MY_WEATHER_SYNC_BACKGROUND_WORK_NAME"
     }
 
-    private val database: ForecastItemDatabase  by lazy {
-        ForecastItemDatabase.getInstance(applicationContext)
+    private val database: AppDatabase  by lazy {
+        AppDatabase.getInstance(applicationContext)
     }
 
     private val weatherRepository: WeatherRepositoryInterface by lazy {

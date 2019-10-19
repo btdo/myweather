@@ -2,7 +2,7 @@ package com.example.myweather.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.myweather.database.ForecastItemDatabase
+import com.example.myweather.database.AppDatabase
 import com.example.myweather.database.asCityModel
 import com.example.myweather.database.asDomainModel
 import com.example.myweather.network.City
@@ -13,7 +13,7 @@ import com.example.myweather.utils.DateUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class WeatherRepository(private val database: ForecastItemDatabase) : WeatherRepositoryInterface {
+class WeatherRepository(private val database: AppDatabase) : WeatherRepositoryInterface {
     companion object {
         const val MIN_ITEM_FORCAST_ITEMS = 40
     }

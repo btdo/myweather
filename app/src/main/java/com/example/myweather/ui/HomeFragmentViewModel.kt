@@ -2,7 +2,7 @@ package com.example.myweather.ui
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.example.myweather.database.ForecastItemDatabase
+import com.example.myweather.database.AppDatabase
 import com.example.myweather.repository.*
 import com.example.myweather.utils.WeatherUtils
 import com.google.android.gms.location.LocationCallback
@@ -39,7 +39,7 @@ class HomeFragmentViewModel(
 
 
     private val weatherRepository: WeatherRepositoryInterface =
-        WeatherRepository(ForecastItemDatabase.getInstance(application))
+        WeatherRepository(AppDatabase.getInstance(application))
 
     private val geoLocationRepository: GeoLocationRepositoryInterface by lazy {
         GeoLocationRepository(application.applicationContext)
