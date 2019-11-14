@@ -9,7 +9,7 @@ import android.widget.RemoteViews
 import androidx.preference.PreferenceManager
 import com.example.myweather.R
 import com.example.myweather.database.AppDatabase
-import com.example.myweather.repository.WeatherRepository
+import com.example.myweather.repository.WeatherRepositoryImpl
 import com.example.myweather.utils.WeatherUtils
 import kotlinx.coroutines.runBlocking
 
@@ -52,7 +52,7 @@ class MyWeatherWidget : AppWidgetProvider() {
             ) ?: "Toronto"
 
             val database = AppDatabase.getInstance(context)
-            val repository = WeatherRepository(database)
+            val repository = WeatherRepositoryImpl(database)
             val currentWeather = repository.getCurrentForecast(location, false)
             views.setTextViewText(R.id.appwidget_city, location)
             val weatherImageId: Int = WeatherUtils

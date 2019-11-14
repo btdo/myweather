@@ -38,15 +38,15 @@ class HomeFragmentViewModel(
     private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
 
-    private val weatherRepository: WeatherRepositoryInterface =
-        WeatherRepository(AppDatabase.getInstance(application))
+    private val weatherRepository: WeatherRepository =
+        WeatherRepositoryImpl(AppDatabase.getInstance(application))
 
-    private val geoLocationRepository: GeoLocationRepositoryInterface by lazy {
-        GeoLocationRepository(application.applicationContext)
+    private val geoLocationRepository: GeoLocationRepository by lazy {
+        GeoLocationRepositoryImpl(application.applicationContext)
     }
 
-    private val workManagerRepository: WorkManagerRepositoryInterface by lazy {
-        WorkManagerRepository(application)
+    private val workManagerRepository: WorkManagerRepository by lazy {
+        WorkManagerRepositoryImpl(application)
     }
 
     private val handler = CoroutineExceptionHandler { _, throwable ->

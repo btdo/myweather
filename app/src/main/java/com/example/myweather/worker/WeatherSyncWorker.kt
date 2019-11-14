@@ -8,9 +8,9 @@ import androidx.work.WorkerParameters
 import com.example.myweather.R
 import com.example.myweather.database.AppDatabase
 import com.example.myweather.repository.GeoLocationRepository
-import com.example.myweather.repository.GeoLocationRepositoryInterface
+import com.example.myweather.repository.GeoLocationRepositoryImpl
 import com.example.myweather.repository.WeatherRepository
-import com.example.myweather.repository.WeatherRepositoryInterface
+import com.example.myweather.repository.WeatherRepositoryImpl
 import com.example.myweather.utils.makeStatusNotification
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
@@ -28,12 +28,12 @@ class WeatherSyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorke
         AppDatabase.getInstance(applicationContext)
     }
 
-    private val weatherRepository: WeatherRepositoryInterface by lazy {
-        WeatherRepository(database)
+    private val weatherRepository: WeatherRepository by lazy {
+        WeatherRepositoryImpl(database)
     }
 
-    private val geoLocationRepository: GeoLocationRepositoryInterface by lazy {
-        GeoLocationRepository(applicationContext)
+    private val geoLocationRepository: GeoLocationRepository by lazy {
+        GeoLocationRepositoryImpl(applicationContext)
     }
 
     private var mLocationCallback = object : OnCompleteListener<Location> {
