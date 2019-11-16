@@ -18,14 +18,19 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myweather.MyWeatherApplication
 import com.example.myweather.R
 import com.example.myweather.databinding.FragmentHomeBinding
+import com.example.myweather.repository.GeoLocationRepository
+import com.example.myweather.repository.WeatherRepository
+import com.example.myweather.repository.WorkManagerRepository
 import com.example.myweather.utils.Json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import org.json.JSONArray
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -40,6 +45,15 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
     private val cityList: JSONArray by lazy {
         Json.readFromResources(requireContext(), R.raw.city_list)
     }
+
+    @Inject
+    lateinit var weatherRepository: WeatherRepository
+
+    @Inject
+    lateinit var geoLocationRepository: GeoLocationRepository
+
+    @Inject
+    lateinit var workManagerRepository: WorkManagerRepository
 
     private lateinit var binding: FragmentHomeBinding
     private val viewModel: HomeFragmentViewModel by lazy {
@@ -60,6 +74,9 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
             this,
             HomeFragmentViewModel.Factory(
                 requireActivity().application,
+                weatherRepository,
+                geoLocationRepository,
+                workManagerRepository,
                 isTrackLocationEnable,
                 location,
                 hourlySync,
@@ -67,6 +84,12 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
             )
         ).get(HomeFragmentViewModel::class.java)
     }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        (requireActivity().application as MyWeatherApplication).appComponent.inject(this)
+        super.onCreate(savedInstanceState)
+    }
+
     private lateinit var mSearchView: SearchView
     private lateinit var mMenuItem: MenuItem
     private lateinit var mSharedPreferences: SharedPreferences

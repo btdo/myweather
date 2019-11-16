@@ -5,7 +5,10 @@ import androidx.work.*
 import com.example.myweather.worker.WeatherSyncWorker
 import java.util.concurrent.TimeUnit
 
-class WorkManagerRepositoryImpl(application: Application) : WorkManagerRepository {
+/**
+ * Schedule the weather hourly sync
+ */
+class WorkManagerRepositoryImpl constructor(application: Application) : WorkManagerRepository {
 
     private val workManager: WorkManager by lazy { WorkManager.getInstance(application) }
 

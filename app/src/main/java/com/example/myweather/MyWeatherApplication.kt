@@ -1,6 +1,8 @@
 package com.example.myweather
 
 import android.app.Application
+import com.example.myweather.di.AppComponent
+import com.example.myweather.di.DaggerAppComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -9,6 +11,10 @@ import timber.log.Timber
 class MyWeatherApplication : Application() {
 
     private val applicationScope = CoroutineScope(Dispatchers.Default)
+
+    val appComponent: AppComponent by lazy {
+        DaggerAppComponent.factory().create(this)
+    }
 
     /**
      * onCreate is called before the first screen is shown to the user.

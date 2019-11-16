@@ -13,7 +13,7 @@ import com.example.myweather.utils.DateUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class WeatherRepositoryImpl(private val database: AppDatabase) : WeatherRepository {
+class WeatherRepositoryImpl constructor(private val database: AppDatabase) : WeatherRepository {
     companion object {
         const val MIN_ITEM_FORCAST_ITEMS = 40
     }

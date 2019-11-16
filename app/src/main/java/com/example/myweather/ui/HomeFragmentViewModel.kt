@@ -2,7 +2,6 @@ package com.example.myweather.ui
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.example.myweather.database.AppDatabase
 import com.example.myweather.repository.*
 import com.example.myweather.utils.WeatherUtils
 import com.google.android.gms.location.LocationCallback
@@ -12,6 +11,9 @@ import timber.log.Timber
 
 class HomeFragmentViewModel(
     application: Application,
+    val weatherRepository: WeatherRepository,
+    val geoLocationRepository: GeoLocationRepository,
+    val workManagerRepository: WorkManagerRepository,
     private var mIsTrackByLocationPref: Boolean,
     private val defaultLocation: String,
     private var mIsHourlySyncPref: Boolean,
@@ -36,18 +38,6 @@ class HomeFragmentViewModel(
      * viewModelJob.cancel()
      */
     private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
-
-
-    private val weatherRepository: WeatherRepository =
-        WeatherRepositoryImpl(AppDatabase.getInstance(application))
-
-    private val geoLocationRepository: GeoLocationRepository by lazy {
-        GeoLocationRepositoryImpl(application.applicationContext)
-    }
-
-    private val workManagerRepository: WorkManagerRepository by lazy {
-        WorkManagerRepositoryImpl(application)
-    }
 
     private val handler = CoroutineExceptionHandler { _, throwable ->
         Timber.e(throwable)
@@ -269,6 +259,9 @@ class HomeFragmentViewModel(
      */
     class Factory(
         private val app: Application,
+        private val weatherRepository: WeatherRepository,
+        private val geoLocationRepository: GeoLocationRepository,
+        private val workManagerRepository: WorkManagerRepository,
         private val isTrackByLocationPref: Boolean,
         private val defaultLocation: String,
         private val isHourlySyncPref: Boolean, val isMetric: Boolean
@@ -278,6 +271,9 @@ class HomeFragmentViewModel(
                 @Suppress("UNCHECKED_CAST")
                 return HomeFragmentViewModel(
                     app,
+                    weatherRepository,
+                    geoLocationRepository,
+                    workManagerRepository,
                     isTrackByLocationPref,
                     defaultLocation,
                     isHourlySyncPref,

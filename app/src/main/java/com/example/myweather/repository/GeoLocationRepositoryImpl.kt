@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.*
 
-class GeoLocationRepositoryImpl(private val mContext: Context) : GeoLocationRepository {
+class GeoLocationRepositoryImpl constructor(private val mContext: Context) : GeoLocationRepository {
 
     private var mFusedLocationClient: FusedLocationProviderClient? = null
 

@@ -17,7 +17,9 @@ import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
-
+/**
+ * The worker that actually make the call the the weather network and update the database with the latest data
+ */
 class WeatherSyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
 
     companion object {
