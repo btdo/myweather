@@ -1,6 +1,5 @@
-package com.example.myweather.untils
+package com.example.myweather.utils
 
-import com.example.myweather.utils.DateUtils
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test

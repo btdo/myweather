@@ -13,7 +13,7 @@ import com.example.myweather.databinding.FragmentDayDetailsBinding
 
 
 /**
- *
+ * Fragment to show the details of individual days
  */
 class DayDetailsFragment : Fragment() {
 
