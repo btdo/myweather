@@ -35,8 +35,8 @@
 
             <ImageView
                 android:id="@+id/weather_icon"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+                android:layout_width="@dimen/small_weather_icon"
+                android:layout_height="@dimen/small_weather_icon"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/margin_medium"
                 android:adjustViewBounds="true"

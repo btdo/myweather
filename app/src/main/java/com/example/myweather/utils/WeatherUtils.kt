@@ -15,11 +15,20 @@
  */
 package com.example.myweather.utils
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
 import android.content.Context
-import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
+import android.widget.FrameLayout
+import androidx.annotation.DrawableRes
+import androidx.appcompat.widget.AppCompatImageView
 import com.example.myweather.R
 import com.example.myweather.repository.DailyForecastItem
 import com.example.myweather.repository.ForecastItem
+import com.example.myweather.repository.WeatherCondition
 
 /**
  * Contains useful utilities for a weather app, such as conversion between Celsius and Fahrenheit,
@@ -63,10 +72,11 @@ object WeatherUtils {
      * "21°"
      */
     fun formatTemperature(context: Context, temperature: Double, isMetric: Boolean): String {
-        var temperature = if (isMetric) kelvinToCelsius(temperature) else kelvinToFahrenheit(temperature)
+        val currentTemperature =
+            if (isMetric) kelvinToCelsius(temperature) else kelvinToFahrenheit(temperature)
         val temperatureFormatResourceId = R.string.format_temperature
         /* For presentation, assume the user doesn't care about tenths of a degree. */
-        return String.format(context.getString(temperatureFormatResourceId), temperature)
+        return String.format(context.getString(temperatureFormatResourceId), currentTemperature)
     }
 
 
@@ -101,13 +111,18 @@ object WeatherUtils {
      *
      * @return Wind String in the following form: "2 km/h SW"
      */
-    fun getFormattedWind(context: Context, windSpeed: Float, degrees: Float, isMetric: Boolean): String {
-        var windSpeed = windSpeed
+    fun getFormattedWind(
+        context: Context,
+        windSpeed: Float,
+        degrees: Float,
+        isMetric: Boolean
+    ): String {
+        var currentWindSpeed = windSpeed
         var windFormat = R.string.format_wind_kmh
 
         if (!isMetric) {
             windFormat = R.string.format_wind_mph
-            windSpeed = .621371192237334f * windSpeed
+            currentWindSpeed = .621371192237334f * currentWindSpeed
         }
 
         /*
@@ -133,7 +148,7 @@ object WeatherUtils {
             direction = "NW"
         }
 
-        return String.format(context.getString(windFormat), windSpeed, direction)
+        return String.format(context.getString(windFormat), currentWindSpeed, direction)
     }
 
     /**
@@ -227,42 +242,7 @@ object WeatherUtils {
      * @return resource id for the corresponding icon. -1 if no relation is found.
      */
     fun getSmallArtResourceIdForWeatherCondition(weatherId: Int): Int {
-
-        /*
-         * Based on weather code data for Open Weather Map.
-         */
-        if (weatherId >= 200 && weatherId <= 232) {
-            return R.drawable.ic_storm
-        } else if (weatherId >= 300 && weatherId <= 321) {
-            return R.drawable.ic_light_rain
-        } else if (weatherId >= 500 && weatherId <= 504) {
-            return R.drawable.ic_rain
-        } else if (weatherId == 511) {
-            return R.drawable.ic_snow
-        } else if (weatherId >= 520 && weatherId <= 531) {
-            return R.drawable.ic_rain
-        } else if (weatherId >= 600 && weatherId <= 622) {
-            return R.drawable.ic_snow
-        } else if (weatherId >= 701 && weatherId <= 761) {
-            return R.drawable.ic_fog
-        } else if (weatherId == 761 || weatherId == 771 || weatherId == 781) {
-            return R.drawable.ic_storm
-        } else if (weatherId == 800) {
-            return R.drawable.ic_clear
-        } else if (weatherId == 801) {
-            return R.drawable.ic_light_clouds
-        } else if (weatherId >= 802 && weatherId <= 804) {
-            return R.drawable.ic_cloudy
-        } else if (weatherId >= 900 && weatherId <= 906) {
-            return R.drawable.ic_storm
-        } else if (weatherId >= 958 && weatherId <= 962) {
-            return R.drawable.ic_storm
-        } else if (weatherId >= 951 && weatherId <= 957) {
-            return R.drawable.ic_clear
-        }
-
-        Log.e(LOG_TAG, "Unknown Weather: $weatherId")
-        return R.drawable.ic_storm
+        return WeatherCondition.valueOf(weatherId).smallIcon
     }
 
     /**
@@ -280,42 +260,7 @@ object WeatherUtils {
      * @return resource ID for the corresponding icon. -1 if no relation is found.
      */
     fun getLargeArtResourceIdForWeatherCondition(weatherId: Int): Int {
-
-        /*
-         * Based on weather code data for Open Weather Map.
-         */
-        if (weatherId >= 200 && weatherId <= 232) {
-            return R.drawable.art_storm
-        } else if (weatherId >= 300 && weatherId <= 321) {
-            return R.drawable.art_light_rain
-        } else if (weatherId >= 500 && weatherId <= 504) {
-            return R.drawable.art_rain
-        } else if (weatherId == 511) {
-            return R.drawable.art_snow
-        } else if (weatherId >= 520 && weatherId <= 531) {
-            return R.drawable.art_rain
-        } else if (weatherId >= 600 && weatherId <= 622) {
-            return R.drawable.art_snow
-        } else if (weatherId >= 701 && weatherId <= 761) {
-            return R.drawable.art_fog
-        } else if (weatherId == 761 || weatherId == 771 || weatherId == 781) {
-            return R.drawable.art_storm
-        } else if (weatherId == 800) {
-            return R.drawable.art_clear
-        } else if (weatherId == 801) {
-            return R.drawable.art_light_clouds
-        } else if (weatherId >= 802 && weatherId <= 804) {
-            return R.drawable.art_clouds
-        } else if (weatherId >= 900 && weatherId <= 906) {
-            return R.drawable.art_storm
-        } else if (weatherId >= 958 && weatherId <= 962) {
-            return R.drawable.art_storm
-        } else if (weatherId >= 951 && weatherId <= 957) {
-            return R.drawable.art_clear
-        }
-
-        Log.e(LOG_TAG, "Unknown Weather: $weatherId")
-        return R.drawable.art_storm
+        return WeatherCondition.valueOf(weatherId).largeIcon
     }
 
     fun groupItemsIntoDays(list: List<ForecastItem>): Map<Long, List<ForecastItem>> {
@@ -353,10 +298,64 @@ object WeatherUtils {
             val midDayIndex = items.size / 2
             val weatherId = items.get(midDayIndex).weatherId
             val wind = items.get(midDayIndex).windSpeed
-            dailyItemsList.add(DailyForecastItem(date, weatherId, temp, minTemp, maxTemp, wind, items))
+            dailyItemsList.add(
+                DailyForecastItem(
+                    date,
+                    weatherId,
+                    temp,
+                    minTemp,
+                    maxTemp,
+                    wind,
+                    items
+                )
+            )
         }
 
         dailyItemsList.sortBy { item -> item.date }
         return dailyItemsList
+    }
+
+    fun showerAnimation(context: Context, container: ViewGroup, @DrawableRes resId: Int) {
+        // find container's width and height
+        val containerW = container.width
+        val containerH = container.height
+
+        // add item to the view group
+        val newStar = AppCompatImageView(context)
+        newStar.setImageResource(resId)
+        newStar.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        )
+        container.addView(newStar)
+
+        var starW = newStar.width.toFloat()
+        var starH = newStar.height.toFloat()
+        // scale the image to .3 to .1 of its size
+        newStar.scaleX = Math.random().toFloat() * .3f + .1f
+        newStar.scaleY = newStar.scaleX
+        starW *= newStar.scaleX
+        starH *= newStar.scaleY
+
+        // position the item randomly on the horizontal axis
+        newStar.translationX = Math.random().toFloat() * containerW - starW / 2
+
+        // move the item from top of the view to bottome view
+        val mover =
+            ObjectAnimator.ofFloat(newStar, View.TRANSLATION_Y, -starH, containerH.toFloat())
+        mover.interpolator = AccelerateInterpolator(1f)
+        // mover.removeWhenDone(container, newStar)
+        mover.repeatMode = ObjectAnimator.RESTART
+        mover.repeatCount = ObjectAnimator.INFINITE
+        mover.duration = (Math.random() * 1500 + 500).toLong()
+        mover.start()
+    }
+
+    private fun ObjectAnimator.removeWhenDone(container: ViewGroup, view: View) {
+        addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                // container.removeView(view)
+            }
+        })
     }
 }

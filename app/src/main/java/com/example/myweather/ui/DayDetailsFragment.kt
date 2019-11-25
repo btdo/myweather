@@ -29,7 +29,7 @@ class DayDetailsFragment : Fragment() {
             resources.getString(R.string.pref_units_key),
             ""
         ) == resources.getString(R.string.pref_units_metric)
-        val application = requireNotNull(activity).application
+        val application = requireActivity().application
         val selectedDay = DayDetailsFragmentArgs.fromBundle(arguments!!).forecastItem
         val viewModelFactory = DayDetailsViewModelFactory(application, selectedDay, isMetric)
 

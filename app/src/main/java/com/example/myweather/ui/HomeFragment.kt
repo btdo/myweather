@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.SearchView
 import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -22,9 +23,11 @@ import com.example.myweather.MyWeatherApplication
 import com.example.myweather.R
 import com.example.myweather.databinding.FragmentHomeBinding
 import com.example.myweather.repository.GeoLocationRepository
+import com.example.myweather.repository.WeatherCondition
 import com.example.myweather.repository.WeatherRepository
 import com.example.myweather.repository.WorkManagerRepository
 import com.example.myweather.utils.Json
+import com.example.myweather.utils.WeatherUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -132,6 +135,13 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
             }
         })
 
+        viewModel.weatherId.observe(viewLifecycleOwner, Observer {
+            val animationSettings = WeatherCondition.valueOf(it).animationSettings
+            animationSettings?.let {
+                animateBackground(animationSettings.drawableId, animationSettings.volume)
+            }
+        })
+
         PreferenceManager.getDefaultSharedPreferences(activity)
             .registerOnSharedPreferenceChangeListener(this)
         setHasOptionsMenu(true)
@@ -142,6 +152,14 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
         }
 
         return binding.root
+    }
+
+    fun animateBackground(@DrawableRes drawableId: Int, size: Int) {
+        binding.content.parent.postDelayed({
+            for (i in 1..size) {
+                WeatherUtils.showerAnimation(requireContext(), binding.content.parent, drawableId)
+            }
+        }, 1000)
     }
 
     private fun onLocationPreferenceChange() {

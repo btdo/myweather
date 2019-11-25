@@ -95,15 +95,14 @@ class HomeFragmentViewModel(
     }
 
     val dailyForecast: LiveData<List<DailyForecastItem>> = Transformations.map(weatherRepository.forecast) {
-        // get a list of items that are more than 24 hours away from today
-        val list = it.subList(NUM_ITEMS_PER_DAY, it.lastIndex)
-        // group items within their days
-        val dailyForecastMap = WeatherUtils.groupItemsIntoDays(list)
+        // group items within their days discard the items that are within today
+        val dailyForecastMap = WeatherUtils.groupItemsIntoDays(it)
         // calculate average temperature, min and max for each day
         val dailyForecastItems = WeatherUtils.transformToDailyItems(dailyForecastMap)
         dailyForecastItems
     }
 
+    // get the forcast items for the next 24 hours
     val hourlyForecast: LiveData<List<ForecastItem>> = Transformations.map(weatherRepository.forecast) {
         it.subList(0, NUM_ITEMS_PER_DAY)
     }
