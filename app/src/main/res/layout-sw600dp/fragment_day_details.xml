@@ -18,8 +18,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/white_smoke">
+            android:layout_height="match_parent">
 
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
@@ -28,6 +27,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:cardBackgroundColor="@color/primary"
                 app:layout_constraintWidth_percent="0.4">
 
                 <include

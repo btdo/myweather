@@ -11,7 +11,7 @@
             type="com.example.myweather.ui.HomeFragmentViewModel" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <FrameLayout
         android:id="@+id/parent"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -170,7 +170,7 @@
         </LinearLayout>
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
 
 
 </layout>
