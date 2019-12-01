@@ -36,7 +36,8 @@ import org.json.JSONArray
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPreferenceChangeListener {
+class HomeFragment : Fragment(), CoroutineScope,
+    SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
     }
@@ -60,14 +61,19 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
 
     private lateinit var binding: FragmentHomeBinding
     private val viewModel: HomeFragmentViewModel by lazy {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+        val sharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
         val isTrackLocationEnable =
-            sharedPreferences.getBoolean(resources.getString(R.string.pref_enable_geo_location_key), false)
+            sharedPreferences.getBoolean(
+                resources.getString(R.string.pref_enable_geo_location_key),
+                false
+            )
         val location = sharedPreferences.getString(
             resources.getString(R.string.pref_location_key),
             resources.getString(R.string.pref_location_default)
         )!!
-        val hourlySync = sharedPreferences.getBoolean(resources.getString(R.string.pref_hourly_sync_key), false)
+        val hourlySync =
+            sharedPreferences.getBoolean(resources.getString(R.string.pref_hourly_sync_key), false)
         val isMetric = sharedPreferences.getString(
             resources.getString(R.string.pref_units_key),
             ""
@@ -107,12 +113,16 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
         binding.viewModel = viewModel
 
         val adapter =
-            DailyForecastAdapter(requireContext(), viewModel.isMetric.value ?: true, ForecastClickListener { day ->
-            viewModel.viewSelectedDay(day)
-        })
+            DailyForecastAdapter(
+                requireContext(),
+                viewModel.isMetric.value ?: true,
+                ForecastClickListener { day ->
+                    viewModel.viewSelectedDay(day)
+                })
         binding.content.dailyForecast.adapter = adapter
 
-        val hourlyAdapter = HourlyForecastAdapter(requireContext(), viewModel.isMetric.value ?: true)
+        val hourlyAdapter =
+            HourlyForecastAdapter(requireContext(), viewModel.isMetric.value ?: true)
         binding.content.hourlyForecast.adapter = hourlyAdapter
         binding.content.hourlyForecast.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -145,7 +155,8 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
         PreferenceManager.getDefaultSharedPreferences(activity)
             .registerOnSharedPreferenceChangeListener(this)
         setHasOptionsMenu(true)
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+        mSharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
 
         binding.swipeRefresh.setOnRefreshListener {
             refresh()
@@ -164,7 +175,10 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
 
     private fun onLocationPreferenceChange() {
         val isTrackLocationEnable =
-            mSharedPreferences.getBoolean(resources.getString(R.string.pref_enable_geo_location_key), false)
+            mSharedPreferences.getBoolean(
+                resources.getString(R.string.pref_enable_geo_location_key),
+                false
+            )
         val location = mSharedPreferences.getString(
             resources.getString(R.string.pref_location_key),
             resources.getString(R.string.pref_location_default)
@@ -181,8 +195,10 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
     }
 
     private fun onHourlySyncPreferenceChange() {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
-        val hourlySync = sharedPreferences.getBoolean(resources.getString(R.string.pref_hourly_sync_key), false)
+        val sharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
+        val hourlySync =
+            sharedPreferences.getBoolean(resources.getString(R.string.pref_hourly_sync_key), false)
         viewModel.onHourlySyncPreferenceChange(hourlySync)
     }
 
@@ -190,12 +206,19 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
         when (pref) {
             resources.getString(R.string.pref_location_key) -> onLocationChange()
             resources.getString(R.string.pref_units_key) -> {
-                val isMetric = sharedPreferences.getString(pref, "") == resources.getString(R.string.pref_units_metric)
+                val isMetric = sharedPreferences.getString(
+                    pref,
+                    ""
+                ) == resources.getString(R.string.pref_units_metric)
                 viewModel.onUnitChanged(isMetric)
             }
             resources.getString(R.string.pref_hourly_sync_key) -> onHourlySyncPreferenceChange()
             resources.getString(R.string.pref_enable_geo_location_key) -> {
-                if (sharedPreferences.getBoolean(pref, false)) startTrackingLocation() else stopTrackingLocation()
+                if (sharedPreferences.getBoolean(
+                        pref,
+                        false
+                    )
+                ) startTrackingLocation() else stopTrackingLocation()
             }
         }
     }
@@ -233,11 +256,12 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu, menu)
-        val searchManager = activity?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        val searchManager =
+            requireActivity().getSystemService(Context.SEARCH_SERVICE) as SearchManager
         mMenuItem = menu.findItem(R.id.search)
         mSearchView = (mMenuItem.actionView as SearchView).apply {
             // Assumes current activity is the searchable activity
-            setSearchableInfo(searchManager.getSearchableInfo(activity?.componentName))
+            setSearchableInfo(searchManager.getSearchableInfo(requireActivity().componentName))
             isIconifiedByDefault = true
         }
 
@@ -280,7 +304,11 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
         ) || super.onOptionsItemSelected(item)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             REQUEST_LOCATION_PERMISSION -> {
                 // If the permission is granted, get the location,
@@ -289,9 +317,16 @@ class HomeFragment : Fragment(), CoroutineScope, SharedPreferences.OnSharedPrefe
                     startTrackingLocation()
                 } else {
                     val editor = mSharedPreferences.edit()
-                    editor.putBoolean(resources.getString(R.string.pref_enable_geo_location_key), false)
+                    editor.putBoolean(
+                        resources.getString(R.string.pref_enable_geo_location_key),
+                        false
+                    )
                     editor.apply()
-                    Toast.makeText(this.requireContext(), R.string.location_permission_denied, Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        this.requireContext(),
+                        R.string.location_permission_denied,
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                 }
             }

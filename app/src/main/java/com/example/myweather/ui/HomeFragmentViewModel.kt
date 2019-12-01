@@ -32,7 +32,7 @@ class HomeFragmentViewModel(
     private val viewModelJob = SupervisorJob()
 
     /**
-     * This is the main scope for all coroutines launched by MainViewModel.
+     * This is the main scope for all coroutines launched by ViewModel.
      *
      * Since we pass viewModelJob, you can cancel all coroutines launched by uiScope by calling
      * viewModelJob.cancel()
