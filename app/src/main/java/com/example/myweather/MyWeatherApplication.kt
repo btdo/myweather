@@ -27,16 +27,10 @@ class MyWeatherApplication : Application() {
         delayedInit()
     }
 
-    /**
-     * Setup WorkManager background job to 'fetch' new network data daily.
-     */
-    private fun setupRecurringWork() {
-    }
 
     private fun delayedInit() {
         applicationScope.launch {
             Timber.plant(Timber.DebugTree())
-            setupRecurringWork()
         }
     }
 }

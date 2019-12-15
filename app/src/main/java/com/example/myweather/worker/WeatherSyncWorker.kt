@@ -18,7 +18,7 @@ import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 /**
- * The worker that actually make the call the the weather network and update the database with the latest data
+ * The worker that actually makes the call the the weather network and update the database with the latest data
  */
 class WeatherSyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
 
