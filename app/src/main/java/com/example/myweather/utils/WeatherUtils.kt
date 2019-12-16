@@ -321,28 +321,28 @@ object WeatherUtils {
         val containerH = container.height
 
         // add item to the view group
-        val newStar = AppCompatImageView(context)
-        newStar.setImageResource(resId)
-        newStar.layoutParams = FrameLayout.LayoutParams(
+        val newItem = AppCompatImageView(context)
+        newItem.setImageResource(resId)
+        newItem.layoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.WRAP_CONTENT,
             FrameLayout.LayoutParams.WRAP_CONTENT
         )
-        container.addView(newStar)
+        container.addView(newItem)
 
-        var starW = newStar.width.toFloat()
-        var starH = newStar.height.toFloat()
+        var itemW = newItem.width.toFloat()
+        var itemH = newItem.height.toFloat()
         // scale the image to .3 to .1 of its size
-        newStar.scaleX = Math.random().toFloat() * .3f + .1f
-        newStar.scaleY = newStar.scaleX
-        starW *= newStar.scaleX
-        starH *= newStar.scaleY
+        newItem.scaleX = Math.random().toFloat() * .3f + .1f
+        newItem.scaleY = newItem.scaleX
+        itemW *= newItem.scaleX
+        itemH *= newItem.scaleY
 
         // position the item randomly on the horizontal axis
-        newStar.translationX = Math.random().toFloat() * containerW - starW / 2
+        newItem.translationX = Math.random().toFloat() * containerW - itemW / 2
 
         // move the item from top of the view to bottome view
         val mover =
-            ObjectAnimator.ofFloat(newStar, View.TRANSLATION_Y, -starH, containerH.toFloat())
+            ObjectAnimator.ofFloat(newItem, View.TRANSLATION_Y, -itemH, containerH.toFloat())
         mover.interpolator = AccelerateInterpolator(1f)
         // mover.removeWhenDone(container, newStar)
         mover.repeatMode = ObjectAnimator.RESTART

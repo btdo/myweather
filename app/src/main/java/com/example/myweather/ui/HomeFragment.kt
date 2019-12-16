@@ -26,13 +26,8 @@ import com.example.myweather.repository.GeoLocationRepository
 import com.example.myweather.repository.WeatherCondition
 import com.example.myweather.repository.WeatherRepository
 import com.example.myweather.repository.WorkManagerRepository
-import com.example.myweather.utils.Json
 import com.example.myweather.utils.WeatherUtils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelChildren
-import org.json.JSONArray
+import kotlinx.coroutines.*
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -45,10 +40,6 @@ class HomeFragment : Fragment(), CoroutineScope,
     private val mJob = SupervisorJob()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + mJob
-
-    private val cityList: JSONArray by lazy {
-        Json.readFromResources(requireContext(), R.raw.city_list)
-    }
 
     @Inject
     lateinit var weatherRepository: WeatherRepository
@@ -166,11 +157,11 @@ class HomeFragment : Fragment(), CoroutineScope,
     }
 
     fun animateBackground(@DrawableRes drawableId: Int, size: Int) {
-        binding.content.parent.postDelayed({
+        launch {
             for (i in 1..size) {
                 WeatherUtils.showerAnimation(requireContext(), binding.content.parent, drawableId)
             }
-        }, 1000)
+        }
     }
 
     private fun onLocationPreferenceChange() {
