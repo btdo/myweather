@@ -156,9 +156,9 @@ class HomeFragment : Fragment(), CoroutineScope,
         return binding.root
     }
 
-    fun animateBackground(@DrawableRes drawableId: Int, size: Int) {
+    fun animateBackground(@DrawableRes drawableId: Int, volume: Int) {
         launch {
-            for (i in 1..size) {
+            for (i in 1..volume) {
                 WeatherUtils.showerAnimation(requireContext(), binding.content.parent, drawableId)
             }
         }

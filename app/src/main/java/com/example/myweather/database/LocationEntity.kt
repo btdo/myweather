@@ -7,7 +7,8 @@ import com.example.myweather.network.Coord
 @Entity(tableName = "location_table", primaryKeys = ["id"])
 data class LocationEntity(
     val lat: Double,
-    val lon: Double, val country: String,
+    val lon: Double,
+    val country: String,
     val id: Int,
     val city: String,
     val population: Int?
