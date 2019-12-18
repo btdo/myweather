@@ -1,7 +1,7 @@
 package com.example.myweather.repository
 
 import androidx.lifecycle.LiveData
-import com.example.myweather.network.City
+import com.example.myweather.network.Location
 
 interface WeatherRepository {
 
@@ -18,5 +18,5 @@ interface WeatherRepository {
         isForcedRefresh: Boolean
     ): List<ForecastItem>
 
-    suspend fun getLocation(cityName: String): List<City>
+    suspend fun getLocation(cityName: String): List<Location>
 }

@@ -13,10 +13,10 @@ interface LocationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(cities: List<LocationEntity>)
 
-    @Query("SELECT * from location_table WHERE country = :country and city = :cityName")
-    fun queryLocation(cityName: String, country: String): LocationEntity?
+    @Query("SELECT * from location_table WHERE country = :country and name = :name")
+    fun queryLocation(name: String, country: String): LocationEntity?
 
-    @Query("SELECT * from location_table WHERE city = :cityName")
-    fun queryCity(cityName: String): List<LocationEntity>?
+    @Query("SELECT * from location_table WHERE name = :name")
+    fun queryCity(name: String): List<LocationEntity>?
 
 }

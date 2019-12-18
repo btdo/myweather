@@ -7,13 +7,14 @@ import com.example.myweather.utils.WeatherUtils
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import kotlinx.coroutines.*
+import retrofit2.HttpException
 import timber.log.Timber
 
 class HomeFragmentViewModel(
     application: Application,
-    val weatherRepository: WeatherRepository,
-    val geoLocationRepository: GeoLocationRepository,
-    val workManagerRepository: WorkManagerRepository,
+    private val weatherRepository: WeatherRepository,
+    private val geoLocationRepository: GeoLocationRepository,
+    private val workManagerRepository: WorkManagerRepository,
     private var mIsTrackByLocationPref: Boolean,
     private val defaultLocation: String,
     private var mIsHourlySyncPref: Boolean,
@@ -60,13 +61,14 @@ class HomeFragmentViewModel(
      * Event triggered for network error. This is private to avoid exposing a
      * way to set this value to observers.
      */
-    private var _showError = MutableLiveData<Boolean>()
+    private var _showError = MutableLiveData<ErrorType>()
     /**
      * Event triggered for network error. Views should use this to get access
      * to the data.
      */
-    val showError: LiveData<Boolean>
+    val showError: LiveData<ErrorType>
         get() = _showError
+
 
     private val _viewSelectedDay = MutableLiveData<DailyForecastItem>()
 
@@ -94,18 +96,20 @@ class HomeFragmentViewModel(
         it.weatherId
     }
 
-    val dailyForecast: LiveData<List<DailyForecastItem>> = Transformations.map(weatherRepository.forecast) {
-        // group items within their days discard the items that are within today
-        val dailyForecastMap = WeatherUtils.groupItemsIntoDays(it)
-        // calculate average temperature, min and max for each day
-        val dailyForecastItems = WeatherUtils.transformToDailyItems(dailyForecastMap)
-        dailyForecastItems
-    }
+    val dailyForecast: LiveData<List<DailyForecastItem>> =
+        Transformations.map(weatherRepository.forecast) {
+            // group items within their days discard the items that are within today
+            val dailyForecastMap = WeatherUtils.groupItemsIntoDays(it)
+            // calculate average temperature, min and max for each day
+            val dailyForecastItems = WeatherUtils.transformToDailyItems(dailyForecastMap)
+            dailyForecastItems
+        }
 
     // get the forcast items for the next 24 hours
-    val hourlyForecast: LiveData<List<ForecastItem>> = Transformations.map(weatherRepository.forecast) {
-        it.subList(0, NUM_ITEMS_PER_DAY)
-    }
+    val hourlyForecast: LiveData<List<ForecastItem>> =
+        Transformations.map(weatherRepository.forecast) {
+            it.subList(0, NUM_ITEMS_PER_DAY)
+        }
 
     private val _isMetric = MutableLiveData<Boolean>().apply { this.value = isMetr }
 
@@ -177,9 +181,18 @@ class HomeFragmentViewModel(
     }
 
     fun getWeatherByLocation(location: String, isForcedRefresh: Boolean) {
-        _location.value = location
-        getTodayWeather(location, isForcedRefresh)
-        getDailyForecast(location, isForcedRefresh)
+        viewModelScope.launch {
+            try {
+                weatherRepository.getCurrentForecast(location, isForcedRefresh)
+                weatherRepository.getComingDaysForecast(location, isForcedRefresh)
+                _location.value = location
+            } catch (e: Exception) {
+                if (e is HttpException && e.code() == 404) _showError.value =
+                    ErrorType.LOCATION_NOT_FOUND(location) else _showError.value =
+                    ErrorType.GenericError()
+            }
+        }
+
     }
 
     fun refresh() {
@@ -217,35 +230,11 @@ class HomeFragmentViewModel(
         geoLocationRepository.stopLocationTracking(mLocationCallback)
     }
 
-    private fun getTodayWeather(city: String, isForcedRefresh: Boolean) {
-        viewModelScope.launch {
-            try {
-                weatherRepository.getCurrentForecast(city, isForcedRefresh)
-                _showError.value = false
-            } catch (e: Exception) {
-                // Show a Toast error message and hide the progress bar.
-                _showError.value = true
-            }
-        }
-    }
-
-    private fun getDailyForecast(city: String, isForcedRefresh: Boolean) {
-        viewModelScope.launch {
-            try {
-                weatherRepository.getComingDaysForecast(city, isForcedRefresh)
-                _showError.value = false
-            } catch (e: Exception) {
-                // Show a Toast error message and hide the progress bar.
-                _showError.value = true
-            }
-        }
-    }
-
     /**
      * Resets the network error flag.
      */
     fun onNetworkErrorShown() {
-        _showError.value = false
+        _showError.value = null
     }
 
     override fun onCleared() {
@@ -283,4 +272,9 @@ class HomeFragmentViewModel(
         }
     }
 
+}
+
+sealed class ErrorType {
+    class GenericError : ErrorType()
+    class LOCATION_NOT_FOUND(val location: String) : ErrorType()
 }

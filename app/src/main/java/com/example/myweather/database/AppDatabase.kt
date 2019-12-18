@@ -40,8 +40,7 @@ abstract class AppDatabase : RoomDatabase() {
                             super.onCreate(db)
                             Thread(Runnable { prepopulateDb(context, getInstance(context)) }).start()
                         }
-                    })
-                        .fallbackToDestructiveMigration()
+                    }).fallbackToDestructiveMigration()
                         .build()
                     INSTANCE = instance
                 }
@@ -61,6 +60,7 @@ abstract class AppDatabase : RoomDatabase() {
                 reader.beginArray()
                 val gson = GsonBuilder().create()
                 while (reader.hasNext()) {
+                    Timber.i("Inserting database")
                     val cityJson = gson.fromJson(reader, CityJson::class.java) as CityJson
                     val city = cityJson.asCityLocationEntity()
                     db.locationDao.insert(city)
@@ -69,10 +69,9 @@ abstract class AppDatabase : RoomDatabase() {
                 Timber.e(e)
             } finally {
                 reader?.let { reader.close() }
+                Timber.i("Done inserting database")
             }
         }
-
-
     }
 }
 

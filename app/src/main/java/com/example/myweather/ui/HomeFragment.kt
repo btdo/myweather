@@ -1,12 +1,14 @@
 package com.example.myweather.ui
 
 import android.Manifest
+import android.app.Activity
 import android.app.SearchManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.annotation.DrawableRes
@@ -30,6 +32,7 @@ import com.example.myweather.utils.WeatherUtils
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
+
 
 class HomeFragment : Fragment(), CoroutineScope,
     SharedPreferences.OnSharedPreferenceChangeListener {
@@ -67,10 +70,10 @@ class HomeFragment : Fragment(), CoroutineScope,
             sharedPreferences.getBoolean(resources.getString(R.string.pref_hourly_sync_key), false)
         val isMetric = sharedPreferences.getString(
             resources.getString(R.string.pref_units_key),
-            ""
+            "metric"
         ) == resources.getString(R.string.pref_units_metric)
 
-        ViewModelProviders.of(
+        val model = ViewModelProviders.of(
             this,
             HomeFragmentViewModel.Factory(
                 requireActivity().application,
@@ -83,6 +86,8 @@ class HomeFragment : Fragment(), CoroutineScope,
                 isMetric
             )
         ).get(HomeFragmentViewModel::class.java)
+
+        model
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -122,11 +127,23 @@ class HomeFragment : Fragment(), CoroutineScope,
             adapter.mIsMetric = isMetric ?: true
         })
 
-        viewModel.showError.observe(viewLifecycleOwner, Observer { showNetworkError ->
-            if (showNetworkError) {
-                Toast.makeText(activity, "Network Error", Toast.LENGTH_LONG).show()
+        viewModel.showError.observe(viewLifecycleOwner, Observer { showError ->
+            showError?.let {
+                when (showError) {
+                    is ErrorType.GenericError -> {
+                        Toast.makeText(activity, "Network Error", Toast.LENGTH_LONG).show()
+                    }
+                    is ErrorType.LOCATION_NOT_FOUND -> {
+                        Toast.makeText(
+                            activity,
+                            "Location '${showError.location}' is not found. Please try again with country code, for example 'Toronto, CA' ",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
                 viewModel.onNetworkErrorShown()
             }
+
         })
 
         viewModel.viewSelectedDay.observe(viewLifecycleOwner, Observer {
@@ -156,7 +173,7 @@ class HomeFragment : Fragment(), CoroutineScope,
         return binding.root
     }
 
-    fun animateBackground(@DrawableRes drawableId: Int, volume: Int) {
+    private fun animateBackground(@DrawableRes drawableId: Int, volume: Int) {
         launch {
             for (i in 1..volume) {
                 WeatherUtils.showerAnimation(requireContext(), binding.content.parent, drawableId)
@@ -261,6 +278,7 @@ class HomeFragment : Fragment(), CoroutineScope,
                 override fun onQueryTextSubmit(value: String?): Boolean {
                     value?.let {
                         viewModel.getWeatherByLocation(it, false)
+                        hideKeyboardFrom(requireContext(), mSearchView)
                     }
 
                     return true
@@ -322,6 +340,12 @@ class HomeFragment : Fragment(), CoroutineScope,
                 }
             }
         }
+    }
+
+    fun hideKeyboardFrom(context: Context, view: View) {
+        val imm: InputMethodManager =
+            context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     override fun onResume() {

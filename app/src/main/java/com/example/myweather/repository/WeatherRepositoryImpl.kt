@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.example.myweather.database.AppDatabase
 import com.example.myweather.database.asCityModel
 import com.example.myweather.database.asDomainModel
-import com.example.myweather.network.City
+import com.example.myweather.network.Location
 import com.example.myweather.network.WeatherApi
 import com.example.myweather.network.asDatabaseModel
 import com.example.myweather.network.asDomainModel
@@ -38,10 +38,10 @@ class WeatherRepositoryImpl constructor(private val database: AppDatabase) : Wea
         }
     }
 
-    override suspend fun getLocation(cityName: String): List<City> {
+    override suspend fun getLocation(cityName: String): List<Location> {
         return withContext(Dispatchers.IO) {
             val dbCities = database.locationDao.queryCity(cityName)
-            var modelCities = listOf<City>()
+            var modelCities = listOf<Location>()
             dbCities?.let {
                 modelCities = it.map { locationEntity ->
                     locationEntity.asCityModel()

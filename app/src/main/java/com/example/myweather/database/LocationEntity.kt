@@ -1,8 +1,8 @@
 package com.example.myweather.database
 
 import androidx.room.Entity
-import com.example.myweather.network.City
 import com.example.myweather.network.Coord
+import com.example.myweather.network.Location
 
 @Entity(tableName = "location_table", primaryKeys = ["id"])
 data class LocationEntity(
@@ -10,11 +10,11 @@ data class LocationEntity(
     val lon: Double,
     val country: String,
     val id: Int,
-    val city: String,
+    val name: String,
     val population: Int?
 )
 
-fun LocationEntity.asCityModel(): City {
-    return City(Coord(lat, lon), country, id, city, null)
+fun LocationEntity.asCityModel(): Location {
+    return Location(Coord(lat, lon), country, id, name, null)
 }
 

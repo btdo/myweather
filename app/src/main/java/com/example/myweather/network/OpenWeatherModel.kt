@@ -55,7 +55,7 @@ fun TodayOpenWeather.asDatabaseModel(): ForecastItemEntity {
 }
 
 data class DailyForecastOpenWeather(
-    val city: City,
+    val city: Location,
     val cnt: Int,
     val cod: String,
     val list: List<Day>,
@@ -172,7 +172,7 @@ fun DailyForecastOpenWeather.asDatabaseModel(): List<ForecastItemEntity> {
     return forecastDaysWeather
 }
 
-data class City(
+data class Location(
     val coord: Coord,
     val country: String,
     val id: Int,
@@ -181,7 +181,7 @@ data class City(
 )
 
 data class HourlyForecastOpenWeather(
-    val city: City,
+    val city: Location,
     val cnt: Int,
     val cod: String,
     val list: List<HourlyOpenWeather>,

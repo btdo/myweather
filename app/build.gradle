@@ -15,26 +15,21 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+        buildConfigField "String", "BASE_URL", '"https://api.openweathermap.org/data/2.5/"'
+        buildConfigField "String", "DEFAULT_APPID", '"bb3baa6b163be4873d04a8224b53b145"'
+        buildConfigField "String", "GOOGLE_PLACES_BASE_URL", '"https://maps.googleapis.com/maps/api/place/findplacefromtext/json"'
+        buildConfigField "String", "GOOGLE_PLACES_API_KEY", '"AIzaSyANgrhbqFkoxOFLRV860vUpl68yyqiH6dw"'
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "BASE_URL", '"https://api.openweathermap.org/data/2.5/"'
-            buildConfigField "String", "DEFAULT_APPID", '"bb3baa6b163be4873d04a8224b53b145"'
+
         }
 
         debug {
             applicationIdSuffix ".debug"
             debuggable true
-            buildConfigField "String", "BASE_URL", '"https://samples.openweathermap.org/data/2.5/"'
-            buildConfigField "String", "DEFAULT_APPID", '"b6907d289e10d714a6e88b30761fae22"'
-        }
-
-        debug_prod {
-            initWith debug
-            buildConfigField "String", "BASE_URL", '"https://api.openweathermap.org/data/2.5/"'
-            buildConfigField "String", "DEFAULT_APPID", '"bb3baa6b163be4873d04a8224b53b145"'
         }
     }
     dataBinding {
