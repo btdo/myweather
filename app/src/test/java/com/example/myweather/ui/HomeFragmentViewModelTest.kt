@@ -34,6 +34,9 @@ class HomeFragmentViewModelTest {
     private lateinit var geoLocationRepository: GeoLocationRepository
     @Mock
     private lateinit var workManagerRepository: WorkManagerRepository
+    @Mock
+    private lateinit var sharedPreferencesRepository: SharedPreferencesRepository
+
     private var isTrackByLocationPref = false
     private val defaultLocation = "Toronto,CA"
     private var isHourlySyncPref = false
@@ -48,22 +51,25 @@ class HomeFragmentViewModelTest {
         // This is to replace Dispatchers.Main with a testing dispatcher.
         Dispatchers.setMain(mainThreadSurrogate)
         MockitoAnnotations.initMocks(this)
-
+        Mockito.`when`(sharedPreferencesRepository.isLocationTrackingEnabled())
+            .thenReturn(isTrackByLocationPref)
+        Mockito.`when`(sharedPreferencesRepository.getDefaultLocation()).thenReturn(defaultLocation)
+        Mockito.`when`(sharedPreferencesRepository.isHourlySyncEnabled())
+            .thenReturn(isHourlySyncPref)
+        Mockito.`when`(sharedPreferencesRepository.isMetricUnit()).thenReturn(isMetr)
     }
 
     @Test
     fun testTransformHourlyForecast() {
         _forecast.value = generateListOfForecastItems("Toronto, CA")
         Mockito.`when`(weatherRepository.forecast).thenReturn(_forecast)
+
         viewModel = HomeFragmentViewModel(
             application,
             weatherRepository,
             geoLocationRepository,
             workManagerRepository,
-            isTrackByLocationPref,
-            defaultLocation,
-            isHourlySyncPref,
-            isMetr
+            sharedPreferencesRepository
         )
 
         var forecastObserver = mock(Observer::class.java) as Observer<List<ForecastItem>>
@@ -81,10 +87,7 @@ class HomeFragmentViewModelTest {
             weatherRepository,
             geoLocationRepository,
             workManagerRepository,
-            isTrackByLocationPref,
-            defaultLocation,
-            isHourlySyncPref,
-            isMetr
+            sharedPreferencesRepository
         )
 
         var forecastObserver = mock(Observer::class.java) as Observer<List<DailyForecastItem>>

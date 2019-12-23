@@ -24,10 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myweather.MyWeatherApplication
 import com.example.myweather.R
 import com.example.myweather.databinding.FragmentHomeBinding
-import com.example.myweather.repository.GeoLocationRepository
-import com.example.myweather.repository.WeatherCondition
-import com.example.myweather.repository.WeatherRepository
-import com.example.myweather.repository.WorkManagerRepository
+import com.example.myweather.repository.*
 import com.example.myweather.utils.WeatherUtils
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -53,26 +50,11 @@ class HomeFragment : Fragment(), CoroutineScope,
     @Inject
     lateinit var workManagerRepository: WorkManagerRepository
 
+    @Inject
+    lateinit var sharedPreferencesRepository: SharedPreferencesRepository
+
     private lateinit var binding: FragmentHomeBinding
     private val viewModel: HomeFragmentViewModel by lazy {
-        val sharedPreferences =
-            PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
-        val isTrackLocationEnable =
-            sharedPreferences.getBoolean(
-                resources.getString(R.string.pref_enable_geo_location_key),
-                false
-            )
-        val location = sharedPreferences.getString(
-            resources.getString(R.string.pref_location_key),
-            resources.getString(R.string.pref_location_default)
-        )!!
-        val hourlySync =
-            sharedPreferences.getBoolean(resources.getString(R.string.pref_hourly_sync_key), false)
-        val isMetric = sharedPreferences.getString(
-            resources.getString(R.string.pref_units_key),
-            "metric"
-        ) == resources.getString(R.string.pref_units_metric)
-
         val model = ViewModelProviders.of(
             this,
             HomeFragmentViewModel.Factory(
@@ -80,10 +62,7 @@ class HomeFragment : Fragment(), CoroutineScope,
                 weatherRepository,
                 geoLocationRepository,
                 workManagerRepository,
-                isTrackLocationEnable,
-                location,
-                hourlySync,
-                isMetric
+                sharedPreferencesRepository
             )
         ).get(HomeFragmentViewModel::class.java)
 
@@ -97,7 +76,6 @@ class HomeFragment : Fragment(), CoroutineScope,
 
     private lateinit var mSearchView: SearchView
     private lateinit var mMenuItem: MenuItem
-    private lateinit var mSharedPreferences: SharedPreferences
 
 
     override fun onCreateView(
@@ -133,7 +111,7 @@ class HomeFragment : Fragment(), CoroutineScope,
                     is ErrorType.GenericError -> {
                         Toast.makeText(activity, "Network Error", Toast.LENGTH_LONG).show()
                     }
-                    is ErrorType.LOCATION_NOT_FOUND -> {
+                    is ErrorType.LocationNotFound -> {
                         Toast.makeText(
                             activity,
                             "Location '${showError.location}' is not found. Please try again with country code, for example 'Toronto, CA' ",
@@ -163,8 +141,6 @@ class HomeFragment : Fragment(), CoroutineScope,
         PreferenceManager.getDefaultSharedPreferences(activity)
             .registerOnSharedPreferenceChangeListener(this)
         setHasOptionsMenu(true)
-        mSharedPreferences =
-            PreferenceManager.getDefaultSharedPreferences(activity /* Activity context */)
 
         binding.swipeRefresh.setOnRefreshListener {
             refresh()
@@ -182,25 +158,9 @@ class HomeFragment : Fragment(), CoroutineScope,
     }
 
     private fun onLocationPreferenceChange() {
-        val isTrackLocationEnable =
-            mSharedPreferences.getBoolean(
-                resources.getString(R.string.pref_enable_geo_location_key),
-                false
-            )
-        val location = mSharedPreferences.getString(
-            resources.getString(R.string.pref_location_key),
-            resources.getString(R.string.pref_location_default)
-        )
-        viewModel.onLocationTrackingPreferenceChange(isTrackLocationEnable, location!!)
+        viewModel.onLocationTrackingPreferenceChange()
     }
 
-    private fun onLocationChange() {
-        val location = mSharedPreferences.getString(
-            resources.getString(R.string.pref_location_key),
-            resources.getString(R.string.pref_location_default)
-        )!!
-        viewModel.onLocationChange(location)
-    }
 
     private fun onHourlySyncPreferenceChange() {
         val sharedPreferences =
@@ -212,7 +172,7 @@ class HomeFragment : Fragment(), CoroutineScope,
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, pref: String) {
         when (pref) {
-            resources.getString(R.string.pref_location_key) -> onLocationChange()
+            resources.getString(R.string.pref_location_key) -> onLocationPreferenceChange()
             resources.getString(R.string.pref_units_key) -> {
                 val isMetric = sharedPreferences.getString(
                     pref,
@@ -325,18 +285,12 @@ class HomeFragment : Fragment(), CoroutineScope,
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     startTrackingLocation()
                 } else {
-                    val editor = mSharedPreferences.edit()
-                    editor.putBoolean(
-                        resources.getString(R.string.pref_enable_geo_location_key),
-                        false
-                    )
-                    editor.apply()
+                    sharedPreferencesRepository.setLocationTracking(false)
                     Toast.makeText(
                         this.requireContext(),
                         R.string.location_permission_denied,
                         Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    ).show()
                 }
             }
         }

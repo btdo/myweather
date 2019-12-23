@@ -15,10 +15,7 @@ class HomeFragmentViewModel(
     private val weatherRepository: WeatherRepository,
     private val geoLocationRepository: GeoLocationRepository,
     private val workManagerRepository: WorkManagerRepository,
-    private var mIsTrackByLocationPref: Boolean,
-    private val defaultLocation: String,
-    private var mIsHourlySyncPref: Boolean,
-    private val isMetr: Boolean
+    private val sharedPreferencesRepository: SharedPreferencesRepository
 ) : AndroidViewModel(application) {
     companion object {
         // backend returns in 3 hour internal, so 8x3= 24 for the upcoming day
@@ -47,7 +44,7 @@ class HomeFragmentViewModel(
     private var mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult?) {
             result?.let { locationResult ->
-                if (mIsTrackByLocationPref) {
+                if (sharedPreferencesRepository.isLocationTrackingEnabled()) {
                     viewModelScope.launch(handler) {
                         val address = geoLocationRepository.getAddress(locationResult.lastLocation)
                         getWeatherByLocation(address.city + "," + address.country, false)
@@ -76,7 +73,7 @@ class HomeFragmentViewModel(
         get() = _viewSelectedDay
 
     private val _location = MutableLiveData<String>().apply {
-        defaultLocation
+        sharedPreferencesRepository.getDefaultLocation()
     }
 
     val location: LiveData<String>
@@ -111,7 +108,8 @@ class HomeFragmentViewModel(
             it.subList(0, NUM_ITEMS_PER_DAY)
         }
 
-    private val _isMetric = MutableLiveData<Boolean>().apply { this.value = isMetr }
+    private val _isMetric =
+        MutableLiveData<Boolean>().apply { this.value = sharedPreferencesRepository.isMetricUnit() }
 
     val isMetric: LiveData<Boolean>
         get() {
@@ -143,21 +141,21 @@ class HomeFragmentViewModel(
     }
 
     init {
-        if (mIsTrackByLocationPref) {
+        if (sharedPreferencesRepository.isLocationTrackingEnabled()) {
             onStartTrackingByLocation()
         } else {
-            getWeatherByLocation(defaultLocation, false)
+            getWeatherByLocation(sharedPreferencesRepository.getDefaultLocation(), false)
         }
     }
 
     fun onFragmentResume() {
-        if (mIsTrackByLocationPref) {
+        if (sharedPreferencesRepository.isLocationTrackingEnabled()) {
             onStartTrackingByLocation()
         }
     }
 
     fun onFragmentPause() {
-        if (mIsTrackByLocationPref) {
+        if (sharedPreferencesRepository.isLocationTrackingEnabled()) {
             onStopTrackingByLocation()
         }
     }
@@ -167,16 +165,11 @@ class HomeFragmentViewModel(
         getWeatherByLocation(location, false)
     }
 
-    fun onLocationTrackingPreferenceChange(isTrackByLocationPref: Boolean, location: String) {
-        if (isTrackByLocationPref == mIsTrackByLocationPref) {
-            return
-        }
-
-        mIsTrackByLocationPref = isTrackByLocationPref
-        if (isTrackByLocationPref) {
+    fun onLocationTrackingPreferenceChange() {
+        if (sharedPreferencesRepository.isLocationTrackingEnabled()) {
             onStartTrackingByLocation()
         } else {
-            onLocationChange(location)
+            onLocationChange(sharedPreferencesRepository.getDefaultLocation())
         }
     }
 
@@ -188,7 +181,7 @@ class HomeFragmentViewModel(
                 _location.value = location
             } catch (e: Exception) {
                 if (e is HttpException && e.code() == 404) _showError.value =
-                    ErrorType.LOCATION_NOT_FOUND(location) else _showError.value =
+                    ErrorType.LocationNotFound(location) else _showError.value =
                     ErrorType.GenericError()
             }
         }
@@ -202,11 +195,10 @@ class HomeFragmentViewModel(
     }
 
     fun onHourlySyncPreferenceChange(isHourlySync: Boolean) {
-        if (mIsHourlySyncPref == isHourlySync) {
+        if (sharedPreferencesRepository.isHourlySyncEnabled() == isHourlySync) {
             return
         }
 
-        mIsHourlySyncPref = isHourlySync
         if (isHourlySync) workManagerRepository.enableHourlySync() else workManagerRepository.cancelHourlySync()
     }
 
@@ -250,9 +242,7 @@ class HomeFragmentViewModel(
         private val weatherRepository: WeatherRepository,
         private val geoLocationRepository: GeoLocationRepository,
         private val workManagerRepository: WorkManagerRepository,
-        private val isTrackByLocationPref: Boolean,
-        private val defaultLocation: String,
-        private val isHourlySyncPref: Boolean, val isMetric: Boolean
+        private val sharedPreferencesRepository: SharedPreferencesRepository
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(HomeFragmentViewModel::class.java)) {
@@ -262,19 +252,15 @@ class HomeFragmentViewModel(
                     weatherRepository,
                     geoLocationRepository,
                     workManagerRepository,
-                    isTrackByLocationPref,
-                    defaultLocation,
-                    isHourlySyncPref,
-                    isMetric
+                    sharedPreferencesRepository
                 ) as T
             }
             throw IllegalArgumentException("Unable to construct viewmodel")
         }
     }
-
 }
 
 sealed class ErrorType {
     class GenericError : ErrorType()
-    class LOCATION_NOT_FOUND(val location: String) : ErrorType()
+    class LocationNotFound(val location: String) : ErrorType()
 }

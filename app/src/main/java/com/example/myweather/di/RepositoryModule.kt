@@ -28,4 +28,12 @@ class RepositoryModule {
     fun provideWorkManagerRepository(application: Application): WorkManagerRepository {
         return WorkManagerRepositoryImpl(application)
     }
+
+    @Provides
+    @Singleton
+    fun providesSharedPreferencesRepository(application: Application): SharedPreferencesRepository {
+        return SharedPreferencesRepositoryImpl(application)
+    }
+
+
 }
