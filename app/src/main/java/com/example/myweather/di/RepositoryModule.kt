@@ -19,7 +19,7 @@ class RepositoryModule {
     @Provides
     @Singleton
     fun provideGeoLocationRepository(application: Application): GeoLocationRepository {
-        return GeoLocationRepositoryImpl(application.applicationContext)
+        return GeoLocationRepositoryImpl(application)
     }
 
 

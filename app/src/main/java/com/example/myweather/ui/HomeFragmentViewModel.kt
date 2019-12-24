@@ -9,8 +9,9 @@ import com.google.android.gms.location.LocationResult
 import kotlinx.coroutines.*
 import retrofit2.HttpException
 import timber.log.Timber
+import javax.inject.Inject
 
-class HomeFragmentViewModel(
+class HomeFragmentViewModel @Inject constructor(
     application: Application,
     private val weatherRepository: WeatherRepository,
     private val geoLocationRepository: GeoLocationRepository,

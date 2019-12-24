@@ -15,6 +15,7 @@ import androidx.annotation.DrawableRes
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
@@ -24,7 +25,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myweather.MyWeatherApplication
 import com.example.myweather.R
 import com.example.myweather.databinding.FragmentHomeBinding
-import com.example.myweather.repository.*
+import com.example.myweather.repository.SharedPreferencesRepository
+import com.example.myweather.repository.WeatherCondition
 import com.example.myweather.utils.WeatherUtils
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -42,36 +44,17 @@ class HomeFragment : Fragment(), CoroutineScope,
         get() = Dispatchers.Main + mJob
 
     @Inject
-    lateinit var weatherRepository: WeatherRepository
-
-    @Inject
-    lateinit var geoLocationRepository: GeoLocationRepository
-
-    @Inject
-    lateinit var workManagerRepository: WorkManagerRepository
-
-    @Inject
     lateinit var sharedPreferencesRepository: SharedPreferencesRepository
 
+    @Inject
+    lateinit var viewModeFactory: ViewModelProvider.Factory
+
     private lateinit var binding: FragmentHomeBinding
-    private val viewModel: HomeFragmentViewModel by lazy {
-        val model = ViewModelProviders.of(
-            this,
-            HomeFragmentViewModel.Factory(
-                requireActivity().application,
-                weatherRepository,
-                geoLocationRepository,
-                workManagerRepository,
-                sharedPreferencesRepository
-            )
-        ).get(HomeFragmentViewModel::class.java)
+    private lateinit var viewModel: HomeFragmentViewModel
 
-        model
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
         (requireActivity().application as MyWeatherApplication).appComponent.inject(this)
-        super.onCreate(savedInstanceState)
     }
 
     private lateinit var mSearchView: SearchView
@@ -84,6 +67,8 @@ class HomeFragment : Fragment(), CoroutineScope,
     ): View? {
         binding = FragmentHomeBinding.inflate(inflater)
         binding.lifecycleOwner = this
+        viewModel =
+            ViewModelProviders.of(this, this.viewModeFactory).get(HomeFragmentViewModel::class.java)
         binding.viewModel = viewModel
 
         val adapter =
@@ -152,7 +137,11 @@ class HomeFragment : Fragment(), CoroutineScope,
     private fun animateBackground(@DrawableRes drawableId: Int, volume: Int) {
         launch {
             for (i in 1..volume) {
-                WeatherUtils.showerAnimation(requireContext(), binding.content.parent, drawableId)
+                WeatherUtils.showerAnimation(
+                    requireContext(),
+                    binding.content.parent as ViewGroup,
+                    drawableId
+                )
             }
         }
     }
