@@ -21,7 +21,7 @@ class PopulateLocationDBWorker(ctx: Context, params: WorkerParameters) :
     CoroutineWorker(ctx, params) {
 
     companion object {
-        const val MY_WEATHER_POPULATE_CITY_NAME = "MY_WEATHER_POPULATE_CITY_NAME"
+        const val MY_WEATHER_POPULATE_LOCATION_TABLE = "MY_WEATHER_POPULATE_LOCATION_TABLE"
     }
 
     val database = AppDatabase.getInstance(applicationContext)

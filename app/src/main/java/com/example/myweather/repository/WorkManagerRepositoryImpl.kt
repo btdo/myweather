@@ -36,7 +36,7 @@ class WorkManagerRepositoryImpl constructor(application: Application) : WorkMana
     override fun populateLocationDb() {
         val workRequest = OneTimeWorkRequestBuilder<PopulateLocationDBWorker>().build()
         workManager.enqueueUniqueWork(
-            PopulateLocationDBWorker.MY_WEATHER_POPULATE_CITY_NAME,
+            PopulateLocationDBWorker.MY_WEATHER_POPULATE_LOCATION_TABLE,
             ExistingWorkPolicy.REPLACE,
             workRequest
         )
