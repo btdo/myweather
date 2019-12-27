@@ -5,6 +5,7 @@ interface SharedPreferencesRepository {
     fun getDefaultLocation(): String
     fun isHourlySyncEnabled(): Boolean
     fun isMetricUnit(): Boolean
-
     fun setLocationTracking(isTracking: Boolean)
+    fun isLocationDBPopulated(): Boolean
+    fun markLocationDBPopulated()
 }

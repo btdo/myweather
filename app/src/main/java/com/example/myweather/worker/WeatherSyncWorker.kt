@@ -2,15 +2,10 @@ package com.example.myweather.worker
 
 import android.content.Context
 import android.location.Location
-import androidx.preference.PreferenceManager
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.example.myweather.R
 import com.example.myweather.database.AppDatabase
-import com.example.myweather.repository.GeoLocationRepository
-import com.example.myweather.repository.GeoLocationRepositoryImpl
-import com.example.myweather.repository.WeatherRepository
-import com.example.myweather.repository.WeatherRepositoryImpl
+import com.example.myweather.repository.*
 import com.example.myweather.utils.makeStatusNotification
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
@@ -26,16 +21,17 @@ class WeatherSyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorke
         const val MY_WEATHER_SYNC_BACKGROUND_WORK_NAME = "MY_WEATHER_SYNC_BACKGROUND_WORK_NAME"
     }
 
-    private val database: AppDatabase  by lazy {
-        AppDatabase.getInstance(applicationContext)
-    }
-
     private val weatherRepository: WeatherRepository by lazy {
+        val database = AppDatabase.getInstance(applicationContext)
         WeatherRepositoryImpl(database)
     }
 
     private val geoLocationRepository: GeoLocationRepository by lazy {
         GeoLocationRepositoryImpl(applicationContext)
+    }
+
+    private val preferencesRepository: SharedPreferencesRepository by lazy {
+        SharedPreferencesRepositoryImpl(applicationContext)
     }
 
     private var mLocationCallback = object : OnCompleteListener<Location> {
@@ -55,17 +51,9 @@ class WeatherSyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorke
 
     override suspend fun doWork(): Result {
         try {
-            val sharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(applicationContext/* Activity context */)
-            val isTrackingLocationEnable =
-                sharedPreferences.getBoolean(
-                    applicationContext.resources.getString(R.string.pref_enable_geo_location_key),
-                    false
-                )
-            val location = sharedPreferences.getString(
-                applicationContext.resources.getString(R.string.pref_location_key),
-                applicationContext.resources.getString(R.string.pref_location_default)
-            )!!
+
+            val isTrackingLocationEnable = preferencesRepository.isLocationTrackingEnabled()
+            val location = preferencesRepository.getDefaultLocation()
 
             if (isTrackingLocationEnable) {
                 geoLocationRepository.getCurrentLocation(mLocationCallback)

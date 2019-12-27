@@ -6,7 +6,7 @@ import com.example.myweather.R
 import javax.inject.Inject
 
 
-class SharedPreferencesRepositoryImpl @Inject constructor(val mContext: Context) :
+class SharedPreferencesRepositoryImpl @Inject constructor(mContext: Context) :
     SharedPreferencesRepository {
 
     val sharedPreferences =
@@ -41,6 +41,22 @@ class SharedPreferencesRepositoryImpl @Inject constructor(val mContext: Context)
         editor.putBoolean(
             resources.getString(R.string.pref_enable_geo_location_key),
             isTracking
+        )
+        editor.apply()
+    }
+
+    override fun isLocationDBPopulated(): Boolean {
+        return sharedPreferences.getBoolean(
+            resources.getString(R.string.pref_location_db_populated_key),
+            false
+        )
+    }
+
+    override fun markLocationDBPopulated() {
+        val editor = sharedPreferences.edit()
+        editor.putBoolean(
+            resources.getString(R.string.pref_location_db_populated_key),
+            true
         )
         editor.apply()
     }

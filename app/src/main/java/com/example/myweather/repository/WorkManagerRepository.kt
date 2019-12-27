@@ -4,4 +4,5 @@ interface WorkManagerRepository {
 
     fun enableHourlySync()
     fun cancelHourlySync()
+    fun populateLocationDb()
 }

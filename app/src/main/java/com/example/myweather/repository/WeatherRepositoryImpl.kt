@@ -40,7 +40,7 @@ class WeatherRepositoryImpl constructor(private val database: AppDatabase) : Wea
 
     override suspend fun getLocation(cityName: String): List<Location> {
         return withContext(Dispatchers.IO) {
-            val dbCities = database.locationDao.queryCity(cityName)
+            val dbCities = database.locationDao.queryLocation(cityName)
             var modelCities = listOf<Location>()
             dbCities?.let {
                 modelCities = it.map { locationEntity ->

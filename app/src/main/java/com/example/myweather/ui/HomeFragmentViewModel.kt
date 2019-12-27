@@ -152,6 +152,10 @@ class HomeFragmentViewModel @Inject constructor(
         }
 
     init {
+        if (!sharedPreferencesRepository.isLocationDBPopulated()) {
+            workManagerRepository.populateLocationDb()
+        }
+
         if (sharedPreferencesRepository.isLocationTrackingEnabled()) {
             onStartTrackingByLocation()
         } else {
@@ -194,7 +198,6 @@ class HomeFragmentViewModel @Inject constructor(
         }
 
         viewModelScope.launch(handler) {
-            _location.value = location
             _processing.value = 0
             val currentForecast =
                 async { weatherRepository.getCurrentForecast(location, isForcedRefresh) }
@@ -206,6 +209,7 @@ class HomeFragmentViewModel @Inject constructor(
             _processing.value = 50
             comingDaysForecast.await()
             _processing.value = 100
+            _location.value = location
         }
     }
 

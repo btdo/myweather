@@ -17,6 +17,6 @@ interface LocationDao {
     fun queryLocation(name: String, country: String): LocationEntity?
 
     @Query("SELECT * from location_table WHERE name = :name")
-    fun queryCity(name: String): List<LocationEntity>?
+    fun queryLocation(name: String): List<LocationEntity>?
 
 }
