@@ -144,9 +144,9 @@ class HomeFragmentViewModel @Inject constructor(
         it.humidity
     }
 
-    private var _processing = MutableLiveData<Boolean>()
+    private var _processing = MutableLiveData<Int>()
 
-    val processing: LiveData<Boolean>
+    val processing: LiveData<Int>
         get() {
             return _processing
         }
@@ -186,7 +186,7 @@ class HomeFragmentViewModel @Inject constructor(
 
     fun getWeatherByLocation(location: String, isForcedRefresh: Boolean) {
         val handler = CoroutineExceptionHandler { _, throwable ->
-            _processing.value = false
+            _processing.value = 100
             if (throwable is HttpException && throwable.code() == 404) _showError.value =
                 ErrorType.LocationNotFound(location) else _showError.value =
                 ErrorType.GenericError()
@@ -195,16 +195,18 @@ class HomeFragmentViewModel @Inject constructor(
 
         viewModelScope.launch(handler) {
             _location.value = location
-            _processing.value = true
+            _processing.value = 0
             val currentForecast =
                 async { weatherRepository.getCurrentForecast(location, isForcedRefresh) }
+            _processing.value = 20
             val comingDaysForecast =
                 async { weatherRepository.getComingDaysForecast(location, isForcedRefresh) }
+            _processing.value = 40
             currentForecast.await()
+            _processing.value = 50
             comingDaysForecast.await()
-            _processing.value = false
+            _processing.value = 100
         }
-
     }
 
     fun refresh() {

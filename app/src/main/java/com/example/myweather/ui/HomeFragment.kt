@@ -124,13 +124,6 @@ class HomeFragment : Fragment(), CoroutineScope,
             }
         })
 
-        viewModel.processing.observe(viewLifecycleOwner, Observer {
-            it?.let { isProcessing ->
-                binding.content.pbLoading.visibility =
-                    if (isProcessing) View.VISIBLE else View.INVISIBLE
-            }
-        })
-
         PreferenceManager.getDefaultSharedPreferences(activity)
             .registerOnSharedPreferenceChangeListener(this)
         setHasOptionsMenu(true)

@@ -6,6 +6,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="viewModel"
             type="com.example.myweather.ui.HomeFragmentViewModel" />
@@ -165,16 +167,17 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:itemCount="5"
                 tools:listitem="@layout/daily_forecast_item" />
-
-
         </LinearLayout>
 
         <ProgressBar
             android:id="@+id/pbLoading"
+            android:indeterminate="false"
+            android:max="100"
+            android:progress="@{viewModel.processing}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="invisible" />
+            android:visibility="@{viewModel.processing == 100 ? View.GONE : View.VISIBLE}" />
 
     </FrameLayout>
 
