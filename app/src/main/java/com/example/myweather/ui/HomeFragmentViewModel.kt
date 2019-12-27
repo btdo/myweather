@@ -1,7 +1,10 @@
 package com.example.myweather.ui
 
 import android.app.Application
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import com.example.myweather.repository.*
 import com.example.myweather.utils.WeatherUtils
 import com.google.android.gms.location.LocationCallback
@@ -141,6 +144,13 @@ class HomeFragmentViewModel @Inject constructor(
         it.humidity
     }
 
+    private var _processing = MutableLiveData<Boolean>()
+
+    val processing: LiveData<Boolean>
+        get() {
+            return _processing
+        }
+
     init {
         if (sharedPreferencesRepository.isLocationTrackingEnabled()) {
             onStartTrackingByLocation()
@@ -161,7 +171,7 @@ class HomeFragmentViewModel @Inject constructor(
         }
     }
 
-    fun onLocationChange(location: String) {
+    private fun onLocationChange(location: String) {
         onStopTrackingByLocation()
         getWeatherByLocation(location, false)
     }
@@ -175,16 +185,24 @@ class HomeFragmentViewModel @Inject constructor(
     }
 
     fun getWeatherByLocation(location: String, isForcedRefresh: Boolean) {
-        viewModelScope.launch {
-            try {
-                weatherRepository.getCurrentForecast(location, isForcedRefresh)
-                weatherRepository.getComingDaysForecast(location, isForcedRefresh)
-                _location.value = location
-            } catch (e: Exception) {
-                if (e is HttpException && e.code() == 404) _showError.value =
-                    ErrorType.LocationNotFound(location) else _showError.value =
-                    ErrorType.GenericError()
-            }
+        val handler = CoroutineExceptionHandler { _, throwable ->
+            _processing.value = false
+            if (throwable is HttpException && throwable.code() == 404) _showError.value =
+                ErrorType.LocationNotFound(location) else _showError.value =
+                ErrorType.GenericError()
+            Timber.e("Repository exception %s", throwable)
+        }
+
+        viewModelScope.launch(handler) {
+            _location.value = location
+            _processing.value = true
+            val currentForecast =
+                async { weatherRepository.getCurrentForecast(location, isForcedRefresh) }
+            val comingDaysForecast =
+                async { weatherRepository.getComingDaysForecast(location, isForcedRefresh) }
+            currentForecast.await()
+            comingDaysForecast.await()
+            _processing.value = false
         }
 
     }
@@ -207,7 +225,7 @@ class HomeFragmentViewModel @Inject constructor(
         _viewSelectedDay.value = day
     }
 
-    fun viewSelectedDayComplete() {
+    fun viewSelectedDayCompleted() {
         _viewSelectedDay.value = null
     }
 
@@ -235,30 +253,6 @@ class HomeFragmentViewModel @Inject constructor(
         viewModelJob.cancel()
     }
 
-    /**
-     * Factory for constructing HomeFragmentViewModel with parameter
-     */
-    class Factory(
-        private val app: Application,
-        private val weatherRepository: WeatherRepository,
-        private val geoLocationRepository: GeoLocationRepository,
-        private val workManagerRepository: WorkManagerRepository,
-        private val sharedPreferencesRepository: SharedPreferencesRepository
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(HomeFragmentViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return HomeFragmentViewModel(
-                    app,
-                    weatherRepository,
-                    geoLocationRepository,
-                    workManagerRepository,
-                    sharedPreferencesRepository
-                ) as T
-            }
-            throw IllegalArgumentException("Unable to construct viewmodel")
-        }
-    }
 }
 
 sealed class ErrorType {

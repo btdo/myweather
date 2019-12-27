@@ -104,6 +104,7 @@ class HomeFragment : Fragment(), CoroutineScope,
                         ).show()
                     }
                 }
+
                 viewModel.onNetworkErrorShown()
             }
 
@@ -112,7 +113,7 @@ class HomeFragment : Fragment(), CoroutineScope,
         viewModel.viewSelectedDay.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 this.findNavController().navigate(HomeFragmentDirections.actionHomeToDayDetails(it))
-                viewModel.viewSelectedDayComplete()
+                viewModel.viewSelectedDayCompleted()
             }
         })
 
@@ -120,6 +121,13 @@ class HomeFragment : Fragment(), CoroutineScope,
             val animationSettings = WeatherCondition.valueOf(it).animationSettings
             animationSettings?.let {
                 animateBackground(animationSettings.drawableId, animationSettings.volume)
+            }
+        })
+
+        viewModel.processing.observe(viewLifecycleOwner, Observer {
+            it?.let { isProcessing ->
+                binding.content.pbLoading.visibility =
+                    if (isProcessing) View.VISIBLE else View.INVISIBLE
             }
         })
 
