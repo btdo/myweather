@@ -55,22 +55,21 @@ class WeatherRepositoryImpl constructor(private val database: AppDatabase) : Wea
     override suspend fun getCurrentForecast(
         location: String,
         isForcedRefresh: Boolean
-    ): ForecastItem {
-        return withContext(Dispatchers.IO) {
-            val currentHour = DateUtils.getCurrentHour()
-            var dbItem = database.forecastItemDao.query(currentHour, location.trim().toLowerCase())
-            if (dbItem == null || isForcedRefresh) {
-                val networkItem = WeatherApi.weatherService.getCurrentWeather(location).await()
-                dbItem = networkItem.asDatabaseModel()
-                database.forecastItemDao.insert(dbItem)
-                database.forecastItemDao.clearPastItems(location, currentHour)
-            }
-
-            val domainModel = dbItem.asDomainModel()
-            _currentForecast.postValue(domainModel)
-            return@withContext domainModel
+    ): ForecastItem = withContext(Dispatchers.IO) {
+        val currentHour = DateUtils.getCurrentHour()
+        var dbItem = database.forecastItemDao.query(currentHour, location.trim().toLowerCase())
+        if (dbItem == null || isForcedRefresh) {
+            val networkItem = WeatherApi.weatherService.getCurrentWeather(location).await()
+            dbItem = networkItem.asDatabaseModel()
+            database.forecastItemDao.insert(dbItem)
+            database.forecastItemDao.clearPastItems(location, currentHour)
         }
+
+        val domainModel = dbItem.asDomainModel()
+        _currentForecast.postValue(domainModel)
+        return@withContext domainModel
     }
+
 
     /**
      * backend return forecast for the next 5 days with a 3 hour interval
@@ -78,32 +77,31 @@ class WeatherRepositoryImpl constructor(private val database: AppDatabase) : Wea
     override suspend fun getComingDaysForecast(
         location: String,
         isForcedRefresh: Boolean
-    ): List<ForecastItem> {
-        return withContext(Dispatchers.IO) {
-            val currentHour = DateUtils.getCurrentHour()
-            val forecastItems: List<ForecastItem>
-            val forecastItemsDb =
-                database.forecastItemDao.queryFutureWeatherItems(
-                    currentHour,
-                    location.trim().toLowerCase()
-                )
-            if (forecastItemsDb.size < MIN_ITEM_FORCAST_ITEMS || isForcedRefresh) {
-                val forecastWeather = WeatherApi.weatherService.getDailyForecast(location).await()
-                forecastItems =
-                    forecastWeather.asDomainModel().filter { item -> item.date > currentHour }
-                val dbItems =
-                    forecastWeather.asDatabaseModel().filter { item -> item.date > currentHour }
-                database.forecastItemDao.clearFutureItems(location, currentHour)
-                database.forecastItemDao.insertAll(dbItems)
-            } else {
-                forecastItems = forecastItemsDb.map { item ->
-                    item.asDomainModel()
-                }
+    ): List<ForecastItem> = withContext(Dispatchers.IO) {
+        val currentHour = DateUtils.getCurrentHour()
+        val forecastItems: List<ForecastItem>
+        val forecastItemsDb =
+            database.forecastItemDao.queryFutureWeatherItems(
+                currentHour,
+                location.trim().toLowerCase()
+            )
+        if (forecastItemsDb.size < MIN_ITEM_FORCAST_ITEMS || isForcedRefresh) {
+            val forecastWeather = WeatherApi.weatherService.getDailyForecast(location).await()
+            forecastItems =
+                forecastWeather.asDomainModel().filter { item -> item.date > currentHour }
+            val dbItems =
+                forecastWeather.asDatabaseModel().filter { item -> item.date > currentHour }
+            database.forecastItemDao.clearFutureItems(location, currentHour)
+            database.forecastItemDao.insertAll(dbItems)
+        } else {
+            forecastItems = forecastItemsDb.map { item ->
+                item.asDomainModel()
             }
-
-            _forecast.postValue(forecastItems)
-            return@withContext forecastItems
         }
+
+        _forecast.postValue(forecastItems)
+        return@withContext forecastItems
     }
+
 
 }

@@ -1,45 +1,26 @@
 package com.example.myweather.ui
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.*
 import com.example.myweather.repository.*
 import com.example.myweather.utils.WeatherUtils
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import timber.log.Timber
 import javax.inject.Inject
 
 class HomeFragmentViewModel @Inject constructor(
-    application: Application,
     private val weatherRepository: WeatherRepository,
     private val geoLocationRepository: GeoLocationRepository,
     private val workManagerRepository: WorkManagerRepository,
     private val sharedPreferencesRepository: SharedPreferencesRepository
-) : AndroidViewModel(application) {
+) : ViewModel() {
     companion object {
         // backend returns in 3 hour internal, so 8x3= 24 for the upcoming day
         const val NUM_ITEMS_PER_DAY = 8
     }
-
-    /**
-     * This is the job for all coroutines started by this ViewModel.
-     *
-     * Cancelling this job will cancel all coroutines started by this ViewModel.
-     */
-    private val viewModelJob = SupervisorJob()
-
-    /**
-     * This is the main scope for all coroutines launched by ViewModel.
-     *
-     * Since we pass viewModelJob, you can cancel all coroutines launched by uiScope by calling
-     * viewModelJob.cancel()
-     */
-    private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
     private val handler = CoroutineExceptionHandler { _, throwable ->
         Timber.e(throwable)
@@ -194,20 +175,14 @@ class HomeFragmentViewModel @Inject constructor(
             if (throwable is HttpException && throwable.code() == 404) _showError.value =
                 ErrorType.LocationNotFound(location) else _showError.value =
                 ErrorType.GenericError()
-            Timber.e("Repository exception %s", throwable)
+            Timber.e(throwable, "Repository exception %s")
         }
 
         viewModelScope.launch(handler) {
             _processing.value = 0
-            val currentForecast =
-                async { weatherRepository.getCurrentForecast(location, isForcedRefresh) }
-            _processing.value = 20
-            val comingDaysForecast =
-                async { weatherRepository.getComingDaysForecast(location, isForcedRefresh) }
-            _processing.value = 40
-            currentForecast.await()
+            weatherRepository.getCurrentForecast(location, isForcedRefresh)
             _processing.value = 50
-            comingDaysForecast.await()
+            weatherRepository.getComingDaysForecast(location, isForcedRefresh)
             _processing.value = 100
             _location.value = location
         }
@@ -252,11 +227,6 @@ class HomeFragmentViewModel @Inject constructor(
      */
     fun onNetworkErrorShown() {
         _showError.value = null
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
     }
 
 }

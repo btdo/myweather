@@ -3,24 +3,25 @@ package com.example.myweather.ui
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
+import com.example.myweather.getOrAwaitValue
 import com.example.myweather.repository.*
 import com.example.myweather.utils.generateListOfForecastItems
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.*
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 import org.mockito.Spy
 
 @ExperimentalCoroutinesApi
 class HomeFragmentViewModelTest {
-    private val mainThreadSurrogate = newSingleThreadContext("UI thread")
+
+    private val testDispatcher: TestCoroutineDispatcher = TestCoroutineDispatcher()
+
     @Rule
     @JvmField
     val instantExecutorRule = InstantTaskExecutorRule()
@@ -49,7 +50,7 @@ class HomeFragmentViewModelTest {
     fun setup() {
         // helpful when you want to execute a test in situations where the platform Main dispatcher is not available
         // This is to replace Dispatchers.Main with a testing dispatcher.
-        Dispatchers.setMain(mainThreadSurrogate)
+        Dispatchers.setMain(testDispatcher)
         MockitoAnnotations.initMocks(this)
         Mockito.`when`(sharedPreferencesRepository.isLocationTrackingEnabled())
             .thenReturn(isTrackByLocationPref)
@@ -65,17 +66,14 @@ class HomeFragmentViewModelTest {
         Mockito.`when`(weatherRepository.forecast).thenReturn(_forecast)
 
         viewModel = HomeFragmentViewModel(
-            application,
             weatherRepository,
             geoLocationRepository,
             workManagerRepository,
             sharedPreferencesRepository
         )
 
-        var forecastObserver = mock(Observer::class.java) as Observer<List<ForecastItem>>
-        viewModel.hourlyForecast.observeForever(forecastObserver)
-        val hourlyForecast = viewModel.hourlyForecast
-        Assert.assertEquals(8, hourlyForecast.value!!.size)
+        val hourlyForecast = viewModel.hourlyForecast.getOrAwaitValue()
+        Assert.assertEquals(8, hourlyForecast.size)
     }
 
     @Test
@@ -83,23 +81,20 @@ class HomeFragmentViewModelTest {
         _forecast.value = generateListOfForecastItems("Toronto, CA")
         Mockito.`when`(weatherRepository.forecast).thenReturn(_forecast)
         viewModel = HomeFragmentViewModel(
-            application,
             weatherRepository,
             geoLocationRepository,
             workManagerRepository,
             sharedPreferencesRepository
         )
 
-        var forecastObserver = mock(Observer::class.java) as Observer<List<DailyForecastItem>>
-        viewModel.dailyForecast.observeForever(forecastObserver)
-        val dailyForecast = viewModel.dailyForecast
-        Assert.assertEquals(5, dailyForecast.value!!.size)
+        val dailyForecast = viewModel.dailyForecast.getOrAwaitValue()
+        Assert.assertEquals(5, dailyForecast.size)
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain() // reset main dispatcher to the original Main dispatcher
-        mainThreadSurrogate.close()
+        testDispatcher.cleanupTestCoroutines()
     }
 
 }
