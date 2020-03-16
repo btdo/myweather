@@ -6,11 +6,14 @@ import com.example.myweather.utils.WeatherUtils
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import timber.log.Timber
 import javax.inject.Inject
 
+
+@ExperimentalCoroutinesApi
 class HomeFragmentViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
     private val geoLocationRepository: GeoLocationRepository,
@@ -175,16 +178,24 @@ class HomeFragmentViewModel @Inject constructor(
             if (throwable is HttpException && throwable.code() == 404) _showError.value =
                 ErrorType.LocationNotFound(location) else _showError.value =
                 ErrorType.GenericError()
-            Timber.e(throwable, "Repository exception %s")
+            Timber.e(throwable, "Repository exception")
         }
 
         viewModelScope.launch(handler) {
-            _processing.value = 0
-            weatherRepository.getCurrentForecast(location, isForcedRefresh)
-            _processing.value = 50
-            weatherRepository.getComingDaysForecast(location, isForcedRefresh)
-            _processing.value = 100
             _location.value = location
+            var progress = 0
+            _processing.value = progress
+            launch {
+                weatherRepository.getCurrentForecast(location, isForcedRefresh)
+                progress += 50
+                _processing.value = progress
+            }
+
+            launch {
+                weatherRepository.getComingDaysForecast(location, isForcedRefresh)
+                progress += 50
+                _processing.value = progress
+            }
         }
     }
 

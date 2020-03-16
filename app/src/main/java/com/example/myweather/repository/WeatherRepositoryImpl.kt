@@ -10,10 +10,14 @@ import com.example.myweather.network.WeatherApi
 import com.example.myweather.network.asDatabaseModel
 import com.example.myweather.network.asDomainModel
 import com.example.myweather.utils.DateUtils
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class WeatherRepositoryImpl constructor(private val database: AppDatabase) : WeatherRepository {
+class WeatherRepositoryImpl constructor(
+    private val database: AppDatabase,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) : WeatherRepository {
     companion object {
         const val MIN_ITEM_FORCAST_ITEMS = 40
     }
@@ -39,7 +43,7 @@ class WeatherRepositoryImpl constructor(private val database: AppDatabase) : Wea
     }
 
     override suspend fun getLocation(cityName: String): List<Location> {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             val dbCities = database.locationDao.queryLocation(cityName)
             var modelCities = listOf<Location>()
             dbCities?.let {
@@ -55,7 +59,7 @@ class WeatherRepositoryImpl constructor(private val database: AppDatabase) : Wea
     override suspend fun getCurrentForecast(
         location: String,
         isForcedRefresh: Boolean
-    ): ForecastItem = withContext(Dispatchers.IO) {
+    ): ForecastItem = withContext(ioDispatcher) {
         val currentHour = DateUtils.getCurrentHour()
         var dbItem = database.forecastItemDao.query(currentHour, location.trim().toLowerCase())
         if (dbItem == null || isForcedRefresh) {
@@ -77,7 +81,7 @@ class WeatherRepositoryImpl constructor(private val database: AppDatabase) : Wea
     override suspend fun getComingDaysForecast(
         location: String,
         isForcedRefresh: Boolean
-    ): List<ForecastItem> = withContext(Dispatchers.IO) {
+    ): List<ForecastItem> = withContext(ioDispatcher) {
         val currentHour = DateUtils.getCurrentHour()
         val forecastItems: List<ForecastItem>
         val forecastItemsDb =

@@ -1,17 +1,16 @@
 package com.example.myweather.ui
 
-import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
+import com.example.myweather.MainCoroutineRule
 import com.example.myweather.getOrAwaitValue
 import com.example.myweather.repository.*
 import com.example.myweather.utils.generateListOfForecastItems
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
-import org.junit.*
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
@@ -20,15 +19,15 @@ import org.mockito.Spy
 @ExperimentalCoroutinesApi
 class HomeFragmentViewModelTest {
 
-    private val testDispatcher: TestCoroutineDispatcher = TestCoroutineDispatcher()
+    @Rule
+    @JvmField
+    var mainCoroutineRule = MainCoroutineRule()
 
     @Rule
     @JvmField
     val instantExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var viewModel: HomeFragmentViewModel
-    @Mock
-    private lateinit var application: Application
     @Mock
     private lateinit var weatherRepository: WeatherRepository
     @Mock
@@ -48,9 +47,6 @@ class HomeFragmentViewModelTest {
 
     @Before
     fun setup() {
-        // helpful when you want to execute a test in situations where the platform Main dispatcher is not available
-        // This is to replace Dispatchers.Main with a testing dispatcher.
-        Dispatchers.setMain(testDispatcher)
         MockitoAnnotations.initMocks(this)
         Mockito.`when`(sharedPreferencesRepository.isLocationTrackingEnabled())
             .thenReturn(isTrackByLocationPref)
@@ -91,10 +87,8 @@ class HomeFragmentViewModelTest {
         Assert.assertEquals(5, dailyForecast.size)
     }
 
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain() // reset main dispatcher to the original Main dispatcher
-        testDispatcher.cleanupTestCoroutines()
-    }
+    @Test
+    fun testGetWeatherByLocation() {
 
+    }
 }
