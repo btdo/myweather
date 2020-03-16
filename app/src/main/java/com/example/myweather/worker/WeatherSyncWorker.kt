@@ -69,7 +69,7 @@ class WeatherSyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorke
 
     private suspend fun getWeather(location: String) {
         makeStatusNotification("Starting syncing $location", applicationContext)
-        weatherRepository.getCurrentForecast(location, false)
+        weatherRepository.getTodayForecast(location, false)
         weatherRepository.getComingDaysForecast(location, false)
         makeStatusNotification("Done syncing $location", applicationContext)
     }

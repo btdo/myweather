@@ -11,7 +11,7 @@ interface WeatherRepository {
 
     suspend fun clearCache()
 
-    suspend fun getCurrentForecast(location: String, isForcedRefresh: Boolean): ForecastItem
+    suspend fun getTodayForecast(location: String, isForcedRefresh: Boolean): ForecastItem
 
     suspend fun getComingDaysForecast(
         location: String,

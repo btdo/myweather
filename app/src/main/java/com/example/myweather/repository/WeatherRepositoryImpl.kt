@@ -24,10 +24,10 @@ class WeatherRepositoryImpl constructor(
 
     override val todayForecast: LiveData<ForecastItem>
         get() {
-            return _currentForecast
+            return _todayForecast
         }
 
-    private val _currentForecast = MutableLiveData<ForecastItem>()
+    private val _todayForecast = MutableLiveData<ForecastItem>()
 
     override val forecast: LiveData<List<ForecastItem>>
         get() {
@@ -56,7 +56,7 @@ class WeatherRepositoryImpl constructor(
         }
     }
 
-    override suspend fun getCurrentForecast(
+    override suspend fun getTodayForecast(
         location: String,
         isForcedRefresh: Boolean
     ): ForecastItem = withContext(ioDispatcher) {
@@ -70,7 +70,7 @@ class WeatherRepositoryImpl constructor(
         }
 
         val domainModel = dbItem.asDomainModel()
-        _currentForecast.postValue(domainModel)
+        _todayForecast.postValue(domainModel)
         return@withContext domainModel
     }
 

@@ -53,7 +53,7 @@ class MyWeatherWidget : AppWidgetProvider() {
 
             val database = AppDatabase.getInstance(context)
             val repository = WeatherRepositoryImpl(database)
-            val currentWeather = repository.getCurrentForecast(location, false)
+            val currentWeather = repository.getTodayForecast(location, false)
             views.setTextViewText(R.id.appwidget_city, location)
             val weatherImageId: Int = WeatherUtils
                 .getSmallArtResourceIdForWeatherCondition(currentWeather.weatherId)

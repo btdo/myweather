@@ -2,9 +2,12 @@ package com.example.myweather.ui
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
+import com.example.myweather.FakeWeatherRepository
 import com.example.myweather.MainCoroutineRule
 import com.example.myweather.getOrAwaitValue
 import com.example.myweather.repository.*
+import com.example.myweather.utils.WeatherUtils
+import com.example.myweather.utils.generateForecastItem
 import com.example.myweather.utils.generateListOfForecastItems
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert
@@ -15,6 +18,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import org.mockito.Spy
+import java.util.*
 
 @ExperimentalCoroutinesApi
 class HomeFragmentViewModelTest {
@@ -89,6 +93,36 @@ class HomeFragmentViewModelTest {
 
     @Test
     fun testGetWeatherByLocation() {
+        val location = "Toronto, ON"
+        val fakeWeatherRepository = FakeWeatherRepository()
+        val calendar = Calendar.getInstance(TimeZone.getDefault())
+        val fakeTestItem = generateForecastItem(location, calendar)
+        val fakeTestForecastItemList = generateListOfForecastItems("Toronto, CA")
+        fakeWeatherRepository.todayForecastResult = fakeTestItem
+        fakeWeatherRepository.forecastResult = fakeTestForecastItemList
+        viewModel = HomeFragmentViewModel(
+            fakeWeatherRepository,
+            geoLocationRepository,
+            workManagerRepository,
+            sharedPreferencesRepository
+        )
+
+        viewModel.getWeatherByLocation(location, true)
+
+        val dailyForecastMap = WeatherUtils.groupItemsIntoDays(fakeTestForecastItemList)
+        // calculate average temperature, min and max for each day
+        val dailyForecastItems = WeatherUtils.transformToDailyItems(dailyForecastMap)
+
+        val dailyForecast = viewModel.dailyForecast.getOrAwaitValue()
+        Assert.assertEquals(dailyForecastItems.size, dailyForecast.size)
+
+        val hourlyForecast = viewModel.hourlyForecast.getOrAwaitValue()
+        Assert.assertEquals(8, hourlyForecast.size)
+
+        val description = viewModel.description.getOrAwaitValue()
+        Assert.assertEquals(fakeTestItem.mainDescription, description)
+        val temperature = viewModel.temperature.getOrAwaitValue()
+        Assert.assertEquals(fakeTestItem.temp.toString(), temperature.toString())
 
     }
 }

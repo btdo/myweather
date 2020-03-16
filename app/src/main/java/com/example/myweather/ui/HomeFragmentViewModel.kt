@@ -186,7 +186,7 @@ class HomeFragmentViewModel @Inject constructor(
             var progress = 0
             _processing.value = progress
             launch {
-                weatherRepository.getCurrentForecast(location, isForcedRefresh)
+                weatherRepository.getTodayForecast(location, isForcedRefresh)
                 progress += 50
                 _processing.value = progress
             }
